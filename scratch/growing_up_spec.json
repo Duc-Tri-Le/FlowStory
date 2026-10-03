@@ -1,0 +1,212 @@
+{
+  "name": "Khi Chúng Ta Lớn Lên",
+  "description": "Phim ngắn điện ảnh cảm xúc: Sự tương phản sâu sắc giữa tuổi thơ hồn nhiên được yêu thương và sự cô độc, kiên cường của người trưởng thành.",
+  "material": "realistic",
+  "orientation": "VERTICAL",
+  "story": "Một hành trình cảm xúc song hành giữa hai thời điểm trong cuộc đời: những khoảnh khắc ngây thơ, ấm áp dưới vòng tay mẹ thuở ấu thơ đối chiếu trực tiếp với những áp lực, cô đơn nhưng đầy kiên cường của người đàn ông khi đã trưởng thành giữa thành phố xô bồ.",
+  "characters": [
+    {
+      "name": "Young Boy",
+      "entity_type": "character",
+      "description": "7-year-old Asian boy, innocent cute round face, bright expressive eyes, neat short black hair with soft bangs. Wearing signature primary school attire: a clean crisp white collared polo shirt, navy blue cotton shorts, white socks, sneakers, and a small primary school backpack.",
+      "image_prompt": "STRUCTURE: 3-view character model sheet: front, back, and head profile. Side-by-side turnaround on a single wide horizontal 16:9 canvas with clean solid neutral light gray background. Left: Full body front view standing naturally. Middle: Full body back view showing the blue-and-yellow backpack clearly. Right: Close-up side head profile shot showing facial profile, neat black bangs and innocent expression. Character is a 7-year-old Asian schoolboy wearing a crisp white collared polo shirt, navy blue shorts, white socks, sneakers, and small backpack. Consistent scale, height, clothing, and photorealistic soft studio lighting across all three views. High resolution, 8k, photorealistic RAW photograph, no text, no labels, no watermark."
+    },
+    {
+      "name": "Adult Man",
+      "entity_type": "character",
+      "description": "28-year-old Asian man (the grown-up version of the boy), gentle but weary eyes, slender build, tidy side-part dark hair, subtle dark circles under eyes showing work fatigue. Wearing signature office commuter attire: a light gray collared dress shirt slightly loosened at the collar, charcoal tailored trousers, dark leather belt, minimalist wristwatch, carrying a black shoulder messenger bag.",
+      "image_prompt": "STRUCTURE: 3-view character model sheet: front, back, and head profile. Side-by-side turnaround on a single wide horizontal 16:9 canvas with clean solid neutral studio gray background. Left: Full body front view standing calmly with black messenger bag on shoulder. Middle: Full body back view showing back of gray dress shirt, charcoal trousers, and messenger bag strap. Right: Close-up side head profile shot showing side-part dark hair, tired gentle eyes and jawline. Character is a 28-year-old Asian commuter wearing a light gray collared dress shirt and charcoal trousers. Consistent scale, height, clothing, and photorealistic neutral studio lighting across all three views. High resolution, 8k, photorealistic RAW photograph, no text, no labels, no watermark."
+    },
+    {
+      "name": "Mother",
+      "entity_type": "character",
+      "description": "Loving Asian mother in her early 30s, warm gentle smiling eyes, hair tied in a loose low ponytail, soft caring demeanor. Wearing a cozy cream knit cardigan over a pastel floral home dress, minimal natural makeup, radiating maternal warmth and kindness.",
+      "image_prompt": "STRUCTURE: 3-view character model sheet: front, back, and head profile. Side-by-side turnaround on a single wide horizontal 16:9 canvas with clean solid neutral warm gray studio background. Left: Full body front view standing with hands gently folded in front, smiling warmly. Middle: Full body back view showing the texture of the cream knit cardigan and low ponytail hair. Right: Close-up side head profile shot showing gentle smile, soft jawline and hair details. Character is a 32-year-old Asian mother in a cozy cream cardigan and floral dress. Consistent scale, height, clothing, and warm photorealistic studio lighting across all three views. High resolution, 8k, photorealistic RAW photograph, no text, no labels, no watermark."
+    },
+    {
+      "name": "Strict Boss",
+      "entity_type": "character",
+      "description": "Stern middle-aged Asian man in his late 40s, sharp furrowed brow, commanding posture, short greying hair, wearing a dark navy corporate business suit, crisp white shirt, and silk tie. Intimidating authoritarian corporate presence.",
+      "image_prompt": "STRUCTURE: 3-view character model sheet: front, back, and head profile. Side-by-side turnaround on a single wide horizontal 16:9 canvas with clean solid neutral studio background. Left: Full body front view standing authoritatively in a tailored dark navy suit. Middle: Full body back view showing tailored suit shoulders and commanding posture. Right: Close-up side head profile shot showing furrowed brow, sharp jaw and short greying hair. Character is a 48-year-old Asian corporate executive. Consistent scale, height, clothing, and photorealistic studio lighting across all three views. High resolution, 8k, photorealistic RAW photograph, no text, no labels, no watermark."
+    },
+    {
+      "name": "Sunny School Gate Street",
+      "entity_type": "location",
+      "description": "Charming tree-lined pedestrian sidewalk leading to a colorful primary school gate, dappled morning sunlight filtering through lush green leaves, cheerful warm golden atmosphere. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic wide angle street photography, shot on 24mm lens. Charming morning pedestrian sidewalk outside a primary school gate with green trees and golden sunbeams, peaceful quiet morning atmosphere. Pure scenery, empty environment, absolutely no people."
+    },
+    {
+      "name": "Corporate Office Corridor",
+      "entity_type": "location",
+      "description": "Modern corporate glass-and-steel office entrance and busy hallway, cool white fluorescent lighting, polished gray tile floors, contemporary minimalist aesthetic. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic architectural interior photo of a sleek modern corporate office glass entrance and hallway, polished reflective floors, clean cool lighting. Pure scenery, empty environment, absolutely no people."
+    },
+    {
+      "name": "Cozy Family Kitchen",
+      "entity_type": "location",
+      "description": "Warm nostalgic home dining room with a simple wooden dining table, soft warm yellow pendant lighting, simple cozy decorations, homey intimate environment. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic interior photo of a cozy home kitchen and wooden dining table, warm yellow hanging lamp, soft domestic atmosphere. Pure scenery, empty environment, absolutely no people."
+    },
+    {
+      "name": "Dim Late-Night Cubicle",
+      "entity_type": "location",
+      "description": "Melancholic dim corporate office desk at night, illuminated only by a laptop monitor glow and faint bokeh city lights outside panoramic office windows. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic interior photography of a dark empty office workspace at midnight, lone desk with glowing computer screen, city lights outside window. Pure scenery, empty environment, absolutely no people."
+    },
+    {
+      "name": "Living Room Corner",
+      "entity_type": "location",
+      "description": "Bright airy domestic living room with wooden parquet floor, afternoon sunlight streaming through sheer curtains, innocent peaceful home environment. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic interior photo of a bright living room corner, sunlight streaming through soft white curtains onto wooden parquet floor. Pure scenery, empty environment, absolutely no people."
+    },
+    {
+      "name": "Dark Solitary Apartment",
+      "entity_type": "location",
+      "description": "Small quiet solitary studio apartment room at night, shadowy stillness, ambient faint blue street light filtering through window blinds onto a modest table and chair. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic interior photography of a modest small studio apartment at night, moody shadows, faint street light through horizontal blinds. Pure scenery, empty environment, absolutely no people."
+    },
+    {
+      "name": "Vintage Childhood Photo",
+      "entity_type": "visual_asset",
+      "description": "A slightly faded vintage 4x6 printed color photograph in a simple wooden frame, showing a happy 7-year-old boy laughing outdoors under bright sunlight. Macro detail, warm nostalgic tone.",
+      "image_prompt": "Cinematic close-up product photo of a framed vintage color photograph on a wooden desk, showing a happy laughing child, shallow depth of field, warm nostalgic soft lighting, no text, no letters."
+    }
+  ],
+  "scenes": [
+    {
+      "display_order": 1,
+      "character_names": ["Young Boy", "Mother", "Sunny School Gate Street"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic nostalgic drama, warm morning golden hour. Medium tracking shot moving backwards: Young Boy happily skipping down Sunny School Gate Street, turning around to wave goodbye with a radiant beaming smile, then turning forward and cheerfully jogging into the school gate. Mother smiles warmly waving from the background.",
+      "video_prompt": "0-3s: Low angle tracking shot backward. Young Boy skips forward with boundless joy, backpack bouncing lightly on his shoulders. He turns his head back, waving his hand high with a joyful smile.\n3-5s: Camera pans gently as Young Boy turns back and dashes through the open school gate, bathed in golden sunlight. Mother waves affectionately from the sunlit sidewalk.\n\nAudio: distant cheerful birds chirping, joyful small footsteps, distant school bell chime.\nSFX: gentle rustle of clothes, playful childhood laughter.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Ngày bé, mỗi bước chân đến trường đều ngập tràn niềm vui và sự háo hức không âu lo."
+    },
+    {
+      "display_order": 2,
+      "character_names": ["Adult Man", "Corporate Office Corridor"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic melancholic realism, cool corporate office lighting. Match cut movement: Medium tracking shot in Corporate Office Corridor following Adult Man as he walks through automatic glass entrance doors, holding a buzzing smartphone to his ear with a tense apologetic bow, stepping rapidly into the corridor with tired eyes.",
+      "video_prompt": "0-3s: Matching forward momentum from previous scene. Adult Man steps briskly through automatic glass doors, clutching his shoulder bag strap. His smartphone vibrates in hand; he lifts it to his ear with a weary expression.\n3-5s: Adult Man nods apologetically, murmuring into the phone: \"Em đang làm ạ.\" He bows his head slightly, walking briskly down the long corridor under cold office lights.\n\nAudio: low office hum, distant telephone rings, muffled voice through phone speaker.\nSFX: smartphone vibration buzz, rapid dress shoes clicking on polished tile.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Lớn lên, mỗi bước chân vào công ty là gánh nặng trách nhiệm và những cuộc gọi thúc ép."
+    },
+    {
+      "display_order": 3,
+      "character_names": ["Young Boy", "Mother", "Cozy Family Kitchen"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic nostalgic warmth, soft yellow indoor lighting. Medium eye-level two-shot in Cozy Family Kitchen: Young Boy sitting happily at the wooden dining table, clapping his hands in delight as Mother gently sets down a warm steaming bowl of food and strokes his head with immense tenderness.",
+      "video_prompt": "0-3s: Mother gently sets down a steaming porcelain bowl in front of Young Boy. Young Boy's eyes light up with pure excitement as he happily exclaims: \"Ngon quá!\".\n3-5s: Mother smiles warmly, gently ruffling Young Boy's hair with maternal love. Young Boy eagerly picks up his spoon, savoring the warm home-cooked meal with immense joy.\n\nAudio: soft gentle piano melody, gentle clink of ceramic bowl on wood.\nSFX: soft steam hiss, gentle cheerful boy giggle.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Những bữa cơm tuổi thơ luôn ngập tràn hương vị tình thương và cái xoa đầu ấm áp của mẹ."
+    },
+    {
+      "display_order": 4,
+      "character_names": ["Adult Man", "Dim Late-Night Cubicle"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic solitary realism, moody cold desk lighting. Matching angle from previous scene: Medium shot in Dim Late-Night Cubicle. Adult Man sitting completely alone at his cluttered desk, staring down at a cold takeout box while his smartphone screen blinks beside him. He pauses in heavy contemplation, then silently takes a bite.",
+      "video_prompt": "0-3s: Matching composition of the dinner table. Adult Man sits motionless in the dark office, face illuminated only by the faint desk light. A plain cold plastic food container sits half-open beside him. A phone screen blinks on the desk.\n3-5s: He stares down quietly at the glowing phone for several seconds, sighs softly, and slowly lifts a pair of wooden chopsticks to take a cold bite alone in utter quietness.\n\nAudio: distant quiet office air conditioner hum, faint city traffic murmur outside.\nSFX: subtle plastic lid rustle, quiet swallow.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Giờ đây, bữa ăn chỉ còn là hộp cơm nguội vội vã giữa bộn bề hóa đơn và lo toan."
+    },
+    {
+      "display_order": 5,
+      "character_names": ["Young Boy", "Mother", "Living Room Corner"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic emotional warmth, bright afternoon light. Low angle medium shot in Living Room Corner: Young Boy standing frozen in panic looking down at a shattered porcelain cup on the floor. Mother immediately kneels down beside him, gently patting his shoulder and shaking her head with a reassuring loving smile.",
+      "video_prompt": "0-3s: Porcelain mug hits the wooden floor with a sharp crash. Young Boy flinches and cowers back, head bowed in deep fear of being scolded.\n3-5s: Mother kneels down gently in frame, brushing a stray hair from Young Boy's forehead. Mother whispers gently: \"Không sao, lần sau cẩn thận hơn nhé.\" Young Boy looks up, relieved, and offers a sweet timid smile.\n\nAudio: ceramic cup shattering impact, soft comforting female voice.\nSFX: soft rustle of cardigan, boy sniffing softly in relief.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Thuở bé, mỗi lần lỡ làm vỡ đồ chơi, ta luôn nhận được sự bao dung và vỗ về dịu dàng."
+    },
+    {
+      "display_order": 6,
+      "character_names": ["Adult Man", "Strict Boss", "Corporate Office Corridor"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic harsh drama, cold overhead lighting. Match cut impact: Low angle medium shot in office. A thick paper document folder slams violently onto the desk. Strict Boss gestures aggressively pointing at Adult Man, while Adult Man stands stiffly with head bowed in silence, his hands clenching tightly into trembling fists.",
+      "video_prompt": "0-3s: Match cut impact: Strict Boss slams a paper dossier onto the desk with loud fury, shouting sternly: \"Có mỗi việc này mà cũng làm sai!\". Papers scatter across the surface.\n3-5s: Close-up on Adult Man standing completely still, head lowered, accepting the harsh blame. Close-up on his hand clenching into a tight fist at his side, swallowing his pain in dead silence.\n\nAudio: heavy desk thud, loud angry echoing male shouting voice.\nSFX: fluttering paper scatter, clenched fabric creak.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Trưởng thành rồi, một lỗi lầm nhỏ cũng phải tự mình cúi đầu chịu đựng những lời quát tháo."
+    },
+    {
+      "display_order": 7,
+      "character_names": ["Young Boy", "Mother", "Cozy Family Kitchen"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic nostalgic warmth, golden daylight. Eye-level medium shot in Cozy Family Kitchen: Young Boy holding up a vibrant colorful crayon drawing with pure pride, grinning brightly from ear to ear. Mother sits opposite, beaming with genuine pride and gently nodding encouragement.",
+      "video_prompt": "0-3s: Young Boy proudly hoists up a colorful sheet of drawing paper, enthusiastically gesturing with wide sparkling eyes: \"Sau này con muốn làm lính cứu hỏa!\".\n3-5s: Mother smiles warmly with loving eyes, softly encouraging him: \"Vậy con phải cố gắng nhé.\" Young Boy giggles with unbounded hope, clutching his paper close.\n\nAudio: nostalgic acoustic guitar chords, innocent boy laughter.\nSFX: paper rustling, cheerful crayon clinking.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Từng có những ước mơ tuổi nhỏ bay bổng đầy nhiệt huyết, được khích lệ bằng nụ cười của mẹ."
+    },
+    {
+      "display_order": 8,
+      "character_names": ["Adult Man", "Dim Late-Night Cubicle"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic melancholic solitude, cool monitor glow. Matching angle: Medium shot in Dim Late-Night Cubicle. Adult Man sitting in front of his glowing laptop screen, staring exhausted at endless work windows. His desk phone vibrates, he checks his wristwatch showing midnight, rubs his tired eyes, and resumes typing.",
+      "video_prompt": "0-3s: Matching desk angle. Cold light from the laptop screen reflects in Adult Man's bloodshot, weary eyes. His phone on the desk vibrates once; he glances down, looking at the silent lock screen with a heavy sigh.\n3-5s: He looks at his wristwatch, rubs his strained eyes with his knuckles, takes a deep breath, and quietly begins typing on the keyboard again through the midnight silence.\n\nAudio: rhythmic typing sounds echoing in an empty office, soft clock ticking.\nSFX: gentle phone vibration buzz, weary sigh.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Để rồi ước mơ hôm nay chỉ là cố gắng làm xong thêm một việc, trước khi đồng hồ điểm nửa đêm."
+    },
+    {
+      "display_order": 9,
+      "character_names": ["Young Boy", "Mother", "Sunny School Gate Street"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic tender drama, soft warm daylight. Ground-level two-shot on Sunny School Gate Street: Young Boy sitting on the pavement with a scraped knee, crying with tears on his cheeks. Mother rushes in, kneeling down to wrap him in a deep protective embrace, stroking his back as he buries his face into her shoulder.",
+      "video_prompt": "0-3s: Young Boy sits on the sidewalk, holding his knee, tears streaming down his face as he cries out. Mother runs into frame, dropping to her knees immediately.\n3-5s: Mother pulls Young Boy tightly into her warm embrace, kissing his forehead and whispering: \"Không sao rồi.\" Young Boy snuggles into her chest, gradually calming his sobs.\n\nAudio: emotional violin swell, gentle maternal comforting voice, soft weeping.\nSFX: running footsteps on pavement, gentle fabric rustle.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Những vết xước thuở nhỏ chỉ cần được mẹ ôm vào lòng là mọi đau đớn đều tan biến."
+    },
+    {
+      "display_order": 10,
+      "character_names": ["Adult Man", "Dark Solitary Apartment"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic emotional realism, moody blue shadows. Matching seated posture: Medium shot in Dark Solitary Apartment. Adult Man sitting slumped alone on a chair in the dim room after an exhausting day, head lowered into trembling palms. He pauses, wipes away a silent tear with the back of his hand, and slowly lifts his chin.",
+      "video_prompt": "0-3s: Matching posture of the crying boy. Adult Man sits hunched on a lone wooden chair in the shadowy room, face buried in his hands, shoulders trembling slightly in solitary grief.\n3-5s: No one comes to comfort him. He takes a long shuddering breath, wipes his damp eyes with the back of his hand, sits up straight, and steels his expression with quiet resilience.\n\nAudio: lonely cello solo, deep quiet breath in the dark.\nSFX: cloth rubbing against cheek, heavy chair creak.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Nhưng khi lớn lên, tổn thương chỉ có thể tự mình nuốt nước mắt vào trong rồi tiếp tục bước đi."
+    },
+    {
+      "display_order": 11,
+      "character_names": ["Young Boy", "Mother", "Cozy Family Kitchen"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic festive nostalgia, warm flickering candlelight. Medium close-up in Cozy Family Kitchen: Young Boy sitting before a glowing birthday cake topped with lit candles, surrounded by happy clapping hands. Young Boy closes his eyes making an earnest wish, then blows out the candles amidst joyful laughter.",
+      "video_prompt": "0-3s: Warm candlelight illuminates Young Boy's glowing, joyful face. Loving family hands clap in rhythm around him as they finish singing. Young Boy tightly squeezes his eyes shut, making a pure wish.\n3-5s: Young Boy leans forward and blows out all the candles in one big breath. Smoke curls upward as everyone claps enthusiastically, Young Boy beaming with pure happiness.\n\nAudio: cheerful group singing, warm clapping, joyous laughter.\nSFX: breath blowing on candles, smoke curl sound.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Sinh nhật ngày bé là tiếng vỗ tay rộn ràng và những điều ước thần tiên bên người thân."
+    },
+    {
+      "display_order": 12,
+      "character_names": ["Adult Man", "Dark Solitary Apartment"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic bittersweet realism, dim golden flame. Matching composition: Close-up in Dark Solitary Apartment. Adult Man sitting alone at his dark kitchen counter, staring silently at a single tiny cupcake with one small flickering candle. He watches the lone flame for a quiet moment, then gently blows it out into total darkness.",
+      "video_prompt": "0-3s: Matching close-up on the single candle. Adult Man sits in deep shadow, watching the tiny flickering flame on a small single pastry. His smartphone sits silent on the table without a single message.\n3-5s: He smiles faintly, a bittersweet nostalgic smile, pauses for two seconds, and gently puffs his breath, extinguishing the candle. The room plunges into blue night shadow.\n\nAudio: dead quiet room ambience, solitary breath, lone acoustic note.\nSFX: soft candle puff, tiny wisp of smoke.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Sinh nhật tuổi trưởng thành là ngọn nến nhỏ tự thắp, tự thổi tắt trong căn phòng vắng lặng."
+    },
+    {
+      "display_order": 13,
+      "character_names": ["Young Boy", "Mother", "Sunny School Gate Street"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic joyful reunion, afternoon golden light. Tracking shot on Sunny School Gate Street: Young Boy running down the residential path shouting with pure delight, as the front door swings open and Mother steps out with open arms, catching Young Boy into a spinning happy embrace.",
+      "video_prompt": "0-3s: Young Boy sprints down the sun-drenched pathway toward home, calling out eagerly: \"Mẹ ơi!\". The wooden front door opens wide.\n3-5s: Mother steps out onto the threshold with wide open welcoming arms. Young Boy leaps into her arms, laughing aloud as Mother hugs him close in the warm afternoon glow.\n\nAudio: joyful orchestral crescendo, happy boy shouting, mother laughing.\nSFX: running footsteps on stones, warm embrace impact.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Ngày xưa, bước chân về nhà luôn có mẹ mở rộng vòng tay đón chào."
+    },
+    {
+      "display_order": 14,
+      "character_names": ["Adult Man", "Dark Solitary Apartment"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic atmospheric drama, cool night tones. Matching motion: Tracking shot in Dark Solitary Apartment. Adult Man unlocks the apartment door and steps inside the dark, empty hallway. He sets down his heavy work bag on the floor, standing motionless in the stillness of the quiet room.",
+      "video_prompt": "0-3s: Key turns in the lock; the door opens into complete darkness. Adult Man steps across the threshold, silhouetted against the dim hallway light outside.\n3-5s: He gently shuts the door, unshoulders his heavy messenger bag and places it on the floor. He stands still in the middle of the dark empty room, looking around in quiet contemplation.\n\nAudio: key rattle, heavy door click, silence of an empty apartment.\nSFX: bag setting down with a soft thud, heavy sigh.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Bây giờ, mở cửa căn phòng trọ, chỉ còn sự im lặng và bóng tối đón ta về."
+    },
+    {
+      "display_order": 15,
+      "character_names": ["Adult Man", "Young Boy", "Vintage Childhood Photo", "Dark Solitary Apartment"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic deeply emotional finale, warm golden memory glow. Close-up in Dark Solitary Apartment: Adult Man sitting at the table picking up Vintage Childhood Photo with both hands, gazing tenderly at his 7-year-old self laughing. A slow match dissolve reveals Young Boy in the photo smiling up into the camera, harmonizing into the adult man's gentle face.",
+      "video_prompt": "0-3s: Adult Man gently lifts the wooden frame of Vintage Childhood Photo. Extreme close-up of the photograph: Young Boy laughing joyfully under the warm sun. Adult Man's eyes glisten with tears as a serene smile forms on his lips.\n3-5s: Seamless match dissolve transition: Young Boy in the photo blinks and looks up directly at the camera, overlapping seamlessly with Adult Man's reflection in the glass, blending the innocent child and the resilient adult into one.\n\nAudio: climax of emotional piano and cello theme, soft peaceful resolve, fading to quiet.\nSFX: soft wooden frame handling, gentle breath.\nNegative: subtitles, text on screen, text overlay, watermark, captions, letters, words.",
+      "narrator_text": "Nhưng sâu thẳm bên trong, đứa trẻ vô tư năm nào vẫn luôn ở đó, nhắc nhở ta mỉm cười và kiên cường bước tiếp."
+    }
+  ]
+}

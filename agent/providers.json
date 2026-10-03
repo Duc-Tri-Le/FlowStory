@@ -1,0 +1,10 @@
+{
+  "active": "agy",
+  "roles": {
+    "video_review": {
+      "provider": "agy",
+      "model": null,
+      "effort": null
+    }
+  }
+}

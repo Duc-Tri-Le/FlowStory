@@ -1,0 +1,173 @@
+{
+  "name": "Thằng Não Tàn và Người Xử Lý",
+  "description": "Hài hậu tận thế zombie: Chàng trai tự tin mù quáng liên tục gây họa và người bạn xử lý thẳng tay.",
+  "material": "realistic",
+  "orientation": "VERTICAL",
+  "story": "Trong thế giới hậu tận thế đầy rẫy zombie, anh chàng A luôn tự tin thái quá với những ý tưởng ngớ ngẩn khiến cả nhóm rơi vào cảnh thập tử nhất sinh. Rất may, anh bạn B lạnh lùng luôn có cách giải quyết dứt khoát nhất: xử lý ngay chính A.",
+  "characters": [
+    {
+      "name": "Character A",
+      "entity_type": "character",
+      "description": "Young Asian man, 27 years old, messy ruffled brown hair, naive overly confident smirk, wide expressive eyes. Wearing signature post-apocalyptic attire: an oversized distressed olive-green hooded sweatshirt with frayed cuffs over a faded dark henley, patched khaki cargo pants with duct tape on knees, fingerless gloves, scuffed brown hiking boots. Slender build, expressive body language.",
+      "image_prompt": "Cinematic portrait photograph, shot on 85mm lens, photorealistic, natural available light. Full body portrait of a 27-year-old Asian man with messy ruffled hair, naive confident smirk, wearing an oversized distressed olive-green tactical hoodie over a dark faded henley and patched khaki cargo pants. Centered front-facing view, looking directly at camera, neutral clean studio background, natural proportions. ONE single person only."
+    },
+    {
+      "name": "Character B",
+      "entity_type": "character",
+      "description": "Tall muscular Asian man, 33 years old, stoic emotionless weathered face, sharp piercing eyes, short buzz-cut dark hair with a neatly trimmed short stubble beard. Wearing signature attire: a heavy rugged dark brown distressed leather bomber jacket over a fitted charcoal gray crewneck t-shirt, dark tactical utility trousers with belt holsters, heavy black combat boots. Intimidating calm presence.",
+      "image_prompt": "Cinematic portrait photograph, shot on 85mm lens, photorealistic, natural available light. Full body portrait of a 33-year-old tall athletic Asian man with short buzz-cut hair, short stubble beard, calm stoic expression, wearing a rugged dark brown distressed leather bomber jacket over charcoal shirt and dark tactical pants. Centered front-facing view, looking directly at camera, neutral clean background. ONE single person only."
+    },
+    {
+      "name": "Survivor Group",
+      "entity_type": "generic_troop",
+      "description": "A small weary band of 4 diverse apocalypse survivors in their late 20s to 30s, wearing dirty layered coats, beanies, rugged backpacks, carrying makeshift gear, stressed and anxious exhausted faces.",
+      "image_prompt": "Cinematic establishing portrait shot, photorealistic. A group of four diverse apocalypse survivors standing together, dirty rugged practical travel clothes and backpacks, weary stressed facial expressions. Neutral ruined backdrop, balanced lighting."
+    },
+    {
+      "name": "Zombie Horde",
+      "entity_type": "creature",
+      "description": "Massive horde of aggressive rabid infected zombies, torn bloodied modern clothes, ashen pale rotting skin, wide unhinged eyes, snarling teeth, sprinting frantically.",
+      "image_prompt": "Cinematic action photograph, photorealistic. A crowd of terrifying infected fast zombies surging forward, torn distressed clothing, snarling ferocious expressions, pale mottled skin. Atmospheric moody lighting, no main characters."
+    },
+    {
+      "name": "Friend of A",
+      "entity_type": "character",
+      "description": "Asian man in his late 20s, sweating profusely, terror-stricken face, wearing a dirty faded denim jacket over a torn white graphic t-shirt and muddy blue jeans, running desperately.",
+      "image_prompt": "Cinematic portrait photograph, 85mm lens. Full body portrait of a late 20s Asian man with terrified wide eyes, panting, wearing a faded blue denim jacket and muddy jeans. Centered, front-facing, neutral background."
+    },
+    {
+      "name": "Ruined City Street",
+      "entity_type": "location",
+      "description": "Post-apocalyptic wide city street at sunset, cracked asphalt, rusted abandoned cars scattered across lanes, smoke plumes rising from distant ruined skyscrapers, eerie golden orange twilight haze. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic wide angle landscape photo, shot on 24mm lens. Wide view of an abandoned apocalyptic city boulevard at golden hour sunset, rusted abandoned vehicles, crumbling asphalt, distant smoke plumes between damaged skyscrapers, warm dusty atmosphere. Pure scenery, empty environment, no people, no characters."
+    },
+    {
+      "name": "Underground Bunker",
+      "entity_type": "location",
+      "description": "Heavy underground survival bunker entrance with a massive reinforced steel blast door, manual circular locking wheel, dim yellow industrial emergency lights on damp concrete walls. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic interior photo of an underground survival bunker entrance, thick concrete walls, heavy industrial steel blast door with turnstile locking wheel, dim warm emergency light. Empty environment, absolutely no people."
+    },
+    {
+      "name": "Abandoned Supermarket",
+      "entity_type": "location",
+      "description": "Interior of an apocalyptic abandoned supermarket during daylight, dusty empty metal shelving aisles, broken grocery carts, rays of dusty light streaming through shattered front glass windows. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic interior shot of an abandoned ransacked grocery supermarket, long empty dusty aisles, broken shelves, debris on floor, sunbeams through broken glass. Empty environment, no people."
+    },
+    {
+      "name": "Dusty Retail Store",
+      "entity_type": "location",
+      "description": "Dim messy interior of a small looted retail convenience shop, dust motes floating in dim light, cluttered counter, shattered glass door looking out to an empty street. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic interior photograph of an empty ruined convenience store, cluttered dusty counter, shattered glass storefront. Empty environment, no people."
+    },
+    {
+      "name": "Emergency Red Button Box",
+      "entity_type": "visual_asset",
+      "description": "A bright vibrant red dome emergency push button mounted on an industrial grey metal wall box, with bold yellow stencil warning text above reading: EMERGENCY ALARM - DO NOT PRESS.",
+      "image_prompt": "Cinematic close-up product photo of a bright glossy red dome emergency push button mounted in a weathered metal wall box, yellow stencil warning text 'EMERGENCY ALARM - DO NOT PRESS'. Sharp focus, dramatic side lighting, no people."
+    },
+    {
+      "name": "Overcast Parking Lot",
+      "entity_type": "location",
+      "description": "Open cracked asphalt outdoor parking lot at dusky twilight, abandoned vehicles, rusted lampposts, misty horizon. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic wide shot of an overcast cracked parking lot at twilight, foggy backdrop, empty environment, no people."
+    },
+    {
+      "name": "Abandoned SUV",
+      "entity_type": "visual_asset",
+      "description": "Dusty battered black 4x4 SUV parked askew on cracked pavement, driver side door hanging open, keys dangling in ignition, dashboard fuel meter visibly pinned on E (empty).",
+      "image_prompt": "Cinematic exterior shot of a dusty weathered black SUV on cracked asphalt, driver door open showing keys in ignition. Sharp automotive detail, dramatic lighting, no people."
+    },
+    {
+      "name": "Broken Suspension Bridge",
+      "entity_type": "location",
+      "description": "Dramatic night view of a fractured suspension bridge, middle span collapsed into a dark foggy river canyon below, twisted rebar, cold blue moonlight reflecting off wet concrete. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic night landscape shot of a massive ruined suspension bridge with a broken middle section, foggy chasm below, cold moonlight and mist. Pure scenery, empty environment, no people."
+    },
+    {
+      "name": "Safe Room Interior",
+      "entity_type": "location",
+      "description": "Claustrophobic dim concrete hideout room at night, boarded-up windows, makeshift barricades against heavy wooden door, faint moonlight slicing through cracks. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic interior photo of a dark barricaded safe room at night, boarded windows, rough concrete walls, high contrast shadows. Empty environment, no people."
+    },
+    {
+      "name": "Highrise Rooftop",
+      "entity_type": "location",
+      "description": "Vast open rooftop of a tall concrete high-rise building at sunrise, rusted HVAC ventilation units, safety railings, panoramic view of a ruined city skyline bathed in golden dawn light. PURE SCENERY, EMPTY ENVIRONMENT, ABSOLUTELY NO PEOPLE, NO CHARACTERS.",
+      "image_prompt": "Cinematic wide shot of a rooftop at dawn, safety railings and HVAC units, golden morning sun rising behind misty skyscrapers. Pure scenery, empty environment, no people."
+    }
+  ],
+  "scenes": [
+    {
+      "display_order": 1,
+      "character_names": ["Character A", "Character B", "Survivor Group", "Zombie Horde", "Ruined City Street"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic comedy thriller, golden hour sunset. Wide shot from behind Survivor Group running down the ruined street. Handheld camera motion. Suddenly Character A steps out into the center of the road, spreading his arms wide with an extremely serious expression, forcing the group to stop. Character B stands behind watching him stoically as a massive Zombie Horde sprints in the distant background.",
+      "video_prompt": "0-3s: Survivor Group sprints desperately down the street. Character A steps directly into the center of frame, holding both arms wide shouting: \"DỪNG LẠI!\". The group screeches to an abrupt halt.\n3-6s: Low angle close-up on Character A with a dead-serious face: \"Không ai được chạy. Bạn gái tôi vẫn chưa tới.\" In the background, Zombie Horde roars and rushes closer.\n6-8s: Character B steps in calmly without a word, grabs Character A by the collar and hurls him bodily into the approaching zombie swarm as Character A screams: \"AAAAAAA!\". Character B turns to the group: \"Chạy.\"\n\nAudio: chaotic running footsteps, distant zombie roar, Character A vocal scream fading.\nSFX: cloth rustling, heavy body toss impact, wind whistle.\nNegative: subtitles, watermark, text overlay.",
+      "narrator_text": "Giữa vòng vây của hàng trăm xác sống, A quyết định dừng cả nhóm lại chỉ vì một lý do không thể ngớ ngẩn hơn."
+    },
+    {
+      "display_order": 2,
+      "character_names": ["Character A", "Character B", "Friend of A", "Zombie Horde", "Underground Bunker"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic tense comedy, dim tungsten bunker lighting. Medium shot inside Underground Bunker. Character A bursts through the steel blast door panting, blocking the door with his hands to stop Survivor Group from sealing it, pointing outward with a proud smile while Character B stares coldly at him.",
+      "video_prompt": "0-3s: Hand prepares to slam the heavy bunker door shut. Character A lunges inside panting heavily: \"ĐỢI! Bạn tôi vẫn ở ngoài.\" He points outside.\n3-6s: POV shot outside shows Friend of A running with a gigantic Zombie Horde right behind him. Character A grins proudly to Character B: \"Thấy chưa? Anh ấy sắp tới rồi.\"\n6-8s: Without blinking, Character B grabs Character A and tosses him out the door. Character A shrieks: \"KHÔNG! KHOAN!\". Character B pulls Friend of A inside and slams the heavy blast door with a loud CLANG.\n\nAudio: heavy breathing, zombie screech outside, loud metal door slam reverberation.\nSFX: metallic lever lock clang, muffled scream.\nNegative: subtitles, watermark, text overlay.",
+      "narrator_text": "Tìm được hầm trú ẩn an toàn, nhưng A lại đòi mở cửa đón bạn... kèm theo cả một binh đoàn zombie phía sau."
+    },
+    {
+      "display_order": 3,
+      "character_names": ["Character A", "Character B", "Survivor Group", "Abandoned Supermarket"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic deadpan comedy, dusty daylight. Two-shot in Abandoned Supermarket aisle. Character A holding a heavy crate of bottled water with a proud, stingy expression, handing it to Character B while refusing to let anyone drink. Character B calmly unscrews a water bottle and chugs it directly in front of him.",
+      "video_prompt": "0-3s: Character A hugs a crate of water tightly, lecturing the thirsty Survivor Group with an authoritative frown: \"Phải tiết kiệm. Tin tôi.\"\n3-6s: Character A hands the crate to Character B: \"Cất nó đi.\" Character B silently takes out a bottle, cracks the cap open and drinks deeply. Character A flails his arms: \"TÔI BẢO PHẢI TIẾT KIỆM!\".\n6-8s: Character B calmly sets the bottle down, grabs Character A by the waist and dumps him head-first into a large open green dumpster bin, then hands the bottle to survivors saying: \"Uống đi.\"\n\nAudio: plastic bottle crack, water gulping sounds, hollow plastic dumpster thump.\nSFX: dumpster lid rattle, muffled angry protests from inside bin.\nNegative: subtitles, watermark, text overlay.",
+      "narrator_text": "Tìm thấy nguồn nước quý giá, A kiên quyết bắt mọi người nhịn khát để tiết kiệm, và cái kết không thể đắng hơn."
+    },
+    {
+      "display_order": 4,
+      "character_names": ["Character A", "Character B", "Survivor Group", "Emergency Red Button Box", "Dusty Retail Store"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic slapstick tension, moody lighting. Close-up on Character A's index finger hovering irresistibly over the bright Emergency Red Button Box mounted on the wall inside Dusty Retail Store, showing an innocent curious smile despite survivors gesturing frantically in the background.",
+      "video_prompt": "0-3s: Extreme close-up of Character A's finger hovering over the red button. Character A mutters: \"Tôi tự hỏi nó làm gì.\" Survivor Group gasps: \"A, ĐỪNG!\". Click! The button is firmly pressed.\n3-6s: Instantly deafening emergency sirens wail across the ruined city. Character A blinks innocently: \"Ồ. Có lẽ tôi vừa—\".\n6-8s: Character B steps up in one swift motion, shoves Character A out the front glass door into the street, shuts the door and locks it. Character A runs outside screaming: \"TÔI XIN LỖI!\". Character B deadpans through glass: \"Chạy nhanh hơn.\"\n\nAudio: deafening high-pitch air raid siren WEE-OOO, frantic footsteps outside.\nSFX: metallic button click, glass door latch click.\nNegative: subtitles, watermark, text overlay.",
+      "narrator_text": "Tò mò bấm thử chiếc nút đỏ cấm chạm, A đã biến cả thành phố thành bữa tiệc báo động cho lũ zombie."
+    },
+    {
+      "display_order": 5,
+      "character_names": ["Character A", "Character B", "Survivor Group", "Abandoned SUV", "Overcast Parking Lot"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic comedic absurdity, twilight atmosphere. Medium shot in Overcast Parking Lot: Character A sitting triumphantly in the driver seat of Abandoned SUV revving the wheel, with Character B leaning on the open driver window looking intently at the fuel gauge.",
+      "video_prompt": "0-3s: Character A turns the ignition key in Abandoned SUV with supreme confidence: \"Tôi lái. Tôi từng chơi game.\" Engine roars for two seconds then immediately dies with a mechanical choke.\n3-6s: Close-up on the fuel gauge needle resting firmly on EMPTY. Character A shrugs awkwardly: \"Có vẻ xe bị lỗi.\"\n6-8s: Wide shot: Character B pulls Character A out of the vehicle and forces him to physically pull the front bumper of the SUV with a tow rope while the entire group walks leisurely behind. Character B calmly says: \"Ừ. Anh kéo nó.\"\n\nAudio: engine sputter and die, heavy rope creak, tired panting.\nSFX: car door slam, metallic clink of tow hitch.\nNegative: subtitles, watermark, text overlay.",
+      "narrator_text": "Tự tin lái xe vì từng chơi game, A nhanh chóng nhận ra đồng hồ xăng đã cạn từ lâu."
+    },
+    {
+      "display_order": 6,
+      "character_names": ["Character A", "Character B", "Survivor Group", "Broken Suspension Bridge"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic dramatic comedy, moonlit misty night. Low angle shot on Broken Suspension Bridge. Character A gripping a fraying rope hanging over the deep canyon, preparing to swing across with boundless bravado, while Character B stands silently behind him holding combat shears.",
+      "video_prompt": "0-3s: Character A grabs a rotten hemp rope at the edge of the broken bridge chasm: \"Tin tôi. Thấy chưa? Dễ mà.\"\n3-6s: Character B steps forward with a straight face and cleanly snips the rope with his knife. Character A's rope goes limp. Character A stares in horror: \"MÀY VỪA CẮT CÁI GÌ?!\".\n6-8s: Character A plunges downward into the darkness, landing safely with a loud comical BOING on an inflatable rescue cushion below. Character B turns to the group: \"Đi đường khác.\"\n\nAudio: rope snap twang, falling vocal shriek, rubber cushion impact sound.\nSFX: wind howling through bridge cables, soft rebound bounce.\nNegative: subtitles, watermark, text overlay.",
+      "narrator_text": "Định biểu diễn đu dây qua vực sâu bằng sợi dây mục, A lập tức nhận được bài học cắt dây từ B."
+    },
+    {
+      "display_order": 7,
+      "character_names": ["Character A", "Character B", "Survivor Group", "Zombie Horde", "Safe Room Interior"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, cinematic suspense comedy, high contrast dark shadows. Tight medium shot inside Safe Room Interior. Everyone sitting motionless holding their breath, sweat beading on their faces. Character A in the center smiling mischievously, tapping the play button on his glowing smartphone.",
+      "video_prompt": "0-3s: Tense suffocating silence in the dark room. Character A whispers cheerfully: \"Tôi nghĩ chúng ta nên bật nhạc.\" Everyone violently shakes their head. His thumb hits PLAY.\n3-6s: Upbeat blasting pop music erupts loudly from phone speakers. Outside, Zombie Horde roars and pounds violently against the boarded door. Camera shakes.\n6-8s: Character B yanks the door open, throws Character A out into the zombie-infested hallway, and slams the door shut. Character A stands surrounded by zombies, nodding to his phone: \"...Ít nhất nhạc hay.\"\n\nAudio: blaring loud dance pop music suddenly muffled through door, zombie snarls.\nSFX: rapid wooden door bangs, door latch slam.\nNegative: subtitles, watermark, text overlay.",
+      "narrator_text": "Trong căn phòng nín thở trốn zombie, ý tưởng bật nhạc quẩy của A đã giúp anh có ngay một buổi biểu diễn ngoài hành lang."
+    },
+    {
+      "display_order": 8,
+      "character_names": ["Character A", "Character B", "Survivor Group", "Emergency Red Button Box", "Highrise Rooftop"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, epic cinematic sunrise comedy, warm golden sunrise lighting. Wide establishing shot on Highrise Rooftop overlooking the ruined city skyline at dawn. Exhausted Survivor Group collapses in relief. Character A steps forward noticing a new Emergency Red Button Box on the rooftop wall with a mischievous grin spreading across his face.",
+      "video_prompt": "0-3s: Glorious golden sunrise over the ruined city. Survivor Group sighs in relief. Character A approaches: \"Tôi có một ý tưởng.\" The entire group shouts in unison: \"KHÔNG!\".\n3-6s: Character A looks at Character B's cold stare and retreats: \"...Thôi.\" Three seconds later, Character A spots a giant red DO NOT PRESS button on the roof antenna wall. A sly smile creeps over his face: \"Hmm...\".\n6-8s: Extreme close-up of Character A's finger clicking the button. Sudden cut to black! An apocalyptic loud air raid horn blasts. Text appears: \"NGÀY TẬN THẾ THỨ 13.\"\n\nAudio: gentle dawn breeze, collective sigh, deafening horn blast after cut to black.\nSFX: metallic button click, deep foghorn vibration.\nNegative: subtitles, watermark, text overlay.",
+      "narrator_text": "Sống sót sau đêm kinh hoàng và đón bình minh, A lại nhìn thấy chiếc nút đỏ cấm bấm thứ hai..."
+    }
+  ]
+}

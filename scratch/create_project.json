@@ -1,0 +1,34 @@
+{
+  "name": "The DNA Test Shock",
+  "description": "Drama kịch tính về sự nhầm lẫn tai hại của người chồng khi nhận kết quả xét nghiệm ADN",
+  "story": "A husband confronts his wife with a DNA test showing two children are not his, demanding a divorce and telling her to take the kids away. The wife is initially stunned into silence, but then erupts in disbelief and anger as she reveals the absurd truth: the children belong to his ex-wife, not her.",
+  "language": "vi",
+  "material": "realistic",
+  "flow_project_id": "8b2fdb28-a2db-44bd-a76e-7a9356970dd3",
+  "allow_voice": true,
+  "allow_music": false,
+  "characters": [
+    {
+      "name": "Wife",
+      "entity_type": "character",
+      "description": "A 28-year-old Asian woman with shoulder-length soft brown hair, gentle facial features, wearing comfortable casual home attire including a cream knit sweater and dark trousers. Expressive hazel-brown eyes, natural makeup.",
+      "voice_description": "Emotional clear feminine voice, transitioning from soft confusion to sharp indignation"
+    },
+    {
+      "name": "Husband",
+      "entity_type": "character",
+      "description": "A 32-year-old Asian man with short neat black hair, clean-shaven, sharp jawline, wearing a casual navy blue button-down shirt with rolled-up sleeves and grey trousers. Stern demeanor.",
+      "voice_description": "Stern cold masculine voice, speaking with firm and accusatory tone"
+    },
+    {
+      "name": "Living Room",
+      "entity_type": "location",
+      "description": "Modern family living room in the evening, with a large neutral grey fabric sofa, wooden coffee table, warm ambient lamp light casting cozy yet tense shadows, clean contemporary shelves in the soft-focus background."
+    },
+    {
+      "name": "DNA Test Document",
+      "entity_type": "visual_asset",
+      "description": "An official printed medical test report paper with crisp black text, laboratory header logo, and clear printed checkmarks and tables."
+    }
+  ]
+}

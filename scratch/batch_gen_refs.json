@@ -1,0 +1,24 @@
+{
+  "requests": [
+    {
+      "type": "GENERATE_CHARACTER_IMAGE",
+      "character_id": "6c35db6e-1a95-4790-beed-b3cea1d7ecfb",
+      "project_id": "8b2fdb28-a2db-44bd-a76e-7a9356970dd3"
+    },
+    {
+      "type": "GENERATE_CHARACTER_IMAGE",
+      "character_id": "9e71e74e-09c2-42dd-b440-dc7346b59911",
+      "project_id": "8b2fdb28-a2db-44bd-a76e-7a9356970dd3"
+    },
+    {
+      "type": "GENERATE_CHARACTER_IMAGE",
+      "character_id": "a89ee37f-9dd6-4a59-badc-d53e4f206052",
+      "project_id": "8b2fdb28-a2db-44bd-a76e-7a9356970dd3"
+    },
+    {
+      "type": "GENERATE_CHARACTER_IMAGE",
+      "character_id": "b8941e1a-e22d-42ba-9441-e6732db34cad",
+      "project_id": "8b2fdb28-a2db-44bd-a76e-7a9356970dd3"
+    }
+  ]
+}

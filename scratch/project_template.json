@@ -1,0 +1,30 @@
+{
+  "name": "Tên Dự Án Mẫu",
+  "description": "Mô tả ngắn gọn về dự án",
+  "material": "realistic",
+  "orientation": "VERTICAL",
+  "story": "Tóm tắt cốt truyện tổng thể của video.",
+  "characters": [
+    {
+      "name": "Main Character",
+      "entity_type": "character",
+      "description": "Mô tả ngoại hình cố định: độ tuổi, kiểu tóc, trang phục mặc định, vóc dáng.",
+      "voice_description": "Mô tả giọng nói (nếu có dùng TTS)"
+    },
+    {
+      "name": "Key Location",
+      "entity_type": "location",
+      "description": "Mô tả bối cảnh không gian chính, ánh sáng, chi tiết môi trường."
+    }
+  ],
+  "scenes": [
+    {
+      "display_order": 0,
+      "chain_type": "ROOT",
+      "character_names": ["Main Character"],
+      "prompt": "Mô tả HÀNH ĐỘNG và GÓC MÁY cho ảnh cảnh (không mô tả lại ngoại hình nhân vật).",
+      "video_prompt": "0-3s: [Mô tả chuyển động đầu].\n3-6s: [Mô tả hành động tiếp theo]. Main Character says \"Lời thoại trong ngoặc kép\".\n6-8s: [Chuyển động kết thúc cảnh].\n\nAudio: [mô tả âm thanh môi trường].\nSFX: [hiệu ứng âm thanh].\nNegative: subtitles, watermark, text overlay.",
+      "narrator_text": "Lời dẫn thuyết minh cho cảnh này."
+    }
+  ]
+}
