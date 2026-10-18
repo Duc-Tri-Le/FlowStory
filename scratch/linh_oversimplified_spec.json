@@ -1,0 +1,194 @@
+{
+  "name": "Linh - Hành Trình Trở Về (OverSimplified 2D)",
+  "description": "Câu chuyện cảm động về sự vấp ngã của tuổi trẻ và tình yêu thương bao la của gia đình, vẽ theo phong cách hoạt hình tối giản OverSimplified 2D.",
+  "material": "oversimplified_2d",
+  "orientation": "VERTICAL",
+  "story": "Linh cãi lời bố mẹ để bỏ nhà theo Hùng. Cuộc sống hôn nhân sớm đổ vỡ khi Hùng vô tâm, rượu chè, bỏ mặc Linh một mình chăm con thơ trong căn phòng trọ chật chội. Sau một trận cãi vã đỉnh điểm, Linh bế con trở về nhà cũ. Trước cổng nhà lúc hoàng hôn, bố mẹ đã dang rộng vòng tay đón mẹ con Linh trở về.",
+  "characters": [
+    {
+      "name": "Linh",
+      "entity_type": "character",
+      "description": "LINH, young Vietnamese woman 22 years old. Minimalist OverSimplified 2D cartoon style. Pill-shaped torso in soft pastel pink, slightly oversized circular head, flat skin tone. Long straight black hair falling to shoulders as a flat solid black block with side-parted fringe. Tiny black dot eyes, straight slash eyebrows, simple curved line mouth. Simple white t-shirt with two tiny dot buttons, light blue knee-length skirt as a flat trapezoid block. Thick black stick-figure arms and legs, flat white shoes. Pure flat solid colors, thick bold pitch-black outlines, zero shading.",
+      "image_prompt": "STRUCTURE: Divided into EXACTLY THREE EQUAL VERTICAL FRAMES separated by thin white lines. FRAME 1 (left): Full body front view — LINH standing straight, pill-shaped pink torso, flat white t-shirt with two dot buttons, light blue flat trapezoid skirt, thick black stick-figure arms and legs, flat white shoes, long flat black hair. FRAME 2 (center): Full body back view — identical proportions, facing away showing smooth flat black hair falling to shoulders and back of light blue skirt. FRAME 3 (right): Extreme close-up of face and hair — circular head, flat skin tone, tiny black dot eyes, simple slash eyebrows, small curved line mouth. OverSimplified 2D minimalist cartoon aesthetic, thick uniform bold black outlines, strictly 100% flat solid colors, absolutely zero shading, no gradients, no shadows. Seamless pure solid white background, strictly NO text, NO labels, NO watermark."
+    },
+    {
+      "name": "Hung",
+      "entity_type": "character",
+      "description": "HÙNG, young Vietnamese man 25 years old, charming but irresponsible. Minimalist OverSimplified 2D cartoon aesthetic. Taller bean-shaped torso in flat dark red jacket over a black t-shirt block at chest. Slightly oversized oval head, messy spiky black hair as a flat jagged geometric block, one small dot stud earring. Tiny black dot eyes, one eyebrow slightly raised, smug slightly curved line mouth. Dark grey jeans as flat block, thick black stick legs, flat white sneakers. Pure flat solid colors, thick bold black outlines, zero shading.",
+      "image_prompt": "STRUCTURE: Divided into EXACTLY THREE EQUAL VERTICAL FRAMES separated by thin white lines. FRAME 1 (left): Full body front view — HÙNG standing straight, taller bean-shaped torso in dark red jacket over black t-shirt, dark grey trousers, thick black stick legs, flat white sneakers, messy spiky hair, smug mouth line, tiny earring dot. FRAME 2 (center): Full body back view — identical proportions, facing away showing jagged spiky black hair and red jacket. FRAME 3 (right): Extreme close-up of head and face — oval head, messy spiky hair, tiny black dot eyes with one raised slash eyebrow, smug smirk line. OverSimplified 2D minimalist cartoon style, thick uniform pitch-black outlines, completely flat solid colors, zero shading, no gradients. Seamless pure solid white background, strictly NO text, NO labels, NO watermark."
+    },
+    {
+      "name": "Father",
+      "entity_type": "character",
+      "description": "BỐ (Father), Vietnamese man around 55 years old, stern but deeply caring. Minimalist OverSimplified 2D cartoon style. Wide pill-shaped torso in light grey short-sleeve shirt with tiny dot buttons. Oval head with a flat grey receding hairline (grey hair as flat block on sides and back, bald top in plain skin tone), thick short black slash eyebrows, tiny dot eyes, straight serious line mouth. Dark brown trousers as flat block, thick black stick legs, flat black sandals. Pure flat colors, thick black outlines, zero shading.",
+      "image_prompt": "STRUCTURE: Divided into EXACTLY THREE EQUAL VERTICAL FRAMES separated by thin white lines. FRAME 1 (left): Full body front view — Father standing straight, wide pill-shaped torso, light grey shirt with dot buttons, dark brown trousers, thick black stick limbs, flat sandals, bald top with grey hair on sides, serious line mouth. FRAME 2 (center): Full body back view — identical proportions, facing away showing grey hair ring and back of grey shirt. FRAME 3 (right): Extreme close-up of face — oval head, bald crown, grey sideburn blocks, thick furrowed slash eyebrows, tiny dot eyes, stern straight mouth. OverSimplified 2D minimalist cartoon aesthetic, thick uniform black outlines, 100% flat solid colors, zero shading, no shadows. Seamless pure solid white background, strictly NO text, NO labels, NO watermark."
+    },
+    {
+      "name": "Mother",
+      "entity_type": "character",
+      "description": "MẸ (Mother), Vietnamese woman around 52 years old, gentle and emotional. Minimalist OverSimplified 2D cartoon style. Round pill-shaped torso in warm yellow blouse with three dot buttons, dark green skirt as a flat block. Circular head with short black hair as a rounded block with a small bun on top. Tiny dot eyes, gentle slash eyebrows tilted upward in worry, small curved mouth. Thick black stick limbs, flat brown slippers. Pure flat solid colors, thick black outlines, zero shading.",
+      "image_prompt": "STRUCTURE: Divided into EXACTLY THREE EQUAL VERTICAL FRAMES separated by thin white lines. FRAME 1 (left): Full body front view — Mother standing straight, round pill torso in warm yellow blouse, dark green skirt, thick black stick limbs, flat brown slippers, short hair with small top bun, worried upward-slanted eyebrows. FRAME 2 (center): Full body back view — identical proportions, facing away showing hair bun and back of yellow blouse. FRAME 3 (right): Extreme close-up of face — circular head, top bun, gentle worried eyebrows, tiny dot eyes, soft curved mouth. OverSimplified 2D minimalist cartoon style, thick uniform black outlines, completely flat solid colors, zero shading, no gradients. Seamless pure solid white background, strictly NO text, NO labels, NO watermark."
+    },
+    {
+      "name": "Baby Bin",
+      "entity_type": "character",
+      "description": "BIN, toddler around 2 years old. Minimalist OverSimplified 2D cartoon aesthetic. Very small chubby bean-shaped torso in light green onesie with one dot button. Huge oversized circular head (half the total body size) with a single black curl line of hair on top. Big proportion head, tiny black dot eyes, small curved line mouth. Short thick black stick limbs, tiny rounded feet. Pure flat solid colors, thick bold outlines, zero shading.",
+      "image_prompt": "STRUCTURE: Divided into EXACTLY THREE EQUAL VERTICAL FRAMES separated by thin white lines. FRAME 1 (left): Full body front view — Baby Bin standing cute, very small chubby green onesie body, huge oversized round head, single black curl of hair on top, tiny dot eyes, small cute smile line, short stick limbs. FRAME 2 (center): Full body back view — identical proportions, facing away showing back of green onesie and round head. FRAME 3 (right): Extreme close-up of giant baby face — huge round head, tiny dot eyes, single black curl on crown, cute line mouth. OverSimplified 2D minimalist cartoon style, thick bold black outlines, 100% flat solid colors, zero shading. Seamless pure solid white background, strictly NO text, NO labels, NO watermark."
+    },
+    {
+      "name": "Parents Living Room",
+      "entity_type": "location",
+      "description": "Interior of cozy Vietnamese family living room in the evening. Minimalist OverSimplified 2D cartoon background. Flat beige wall, flat brown wooden sofa with thick black outline, small wooden coffee table with teapot and two teacups, framed family photo on wall (flat rectangle with stick figures), circular wall clock with two hands, flat dark wood altar shelf in corner, pale orange window light shown as a flat rectangle with no gradients. Pure scenery, empty environment, strictly NO people, NO characters.",
+      "image_prompt": "OverSimplified 2D minimalist cartoon background illustration. Interior of a cozy Vietnamese living room, evening. Flat beige wall, flat brown wooden sofa, small coffee table with a teapot and cups, simple framed photo on wall, circular clock, flat dark wood altar shelf in corner. Window shows flat pale orange light. Thick bold uniform black outlines, 100% flat solid colors, completely zero shading, no gradients, no shadows. Pure scenery, empty room, strictly NO people, NO humans."
+    },
+    {
+      "name": "House Gate Exterior",
+      "entity_type": "location",
+      "description": "Exterior of small Vietnamese house gate in late afternoon. Minimalist OverSimplified 2D cartoon background. Flat black iron gate with vertical bars, flat cream-colored perimeter wall with flat red tile roof, one round tree with brown trunk and flat green circular canopy, small circular doorbell on wall, flat grey road in front, flat pale orange sky. Pure scenery, empty environment, strictly NO people, NO characters.",
+      "image_prompt": "OverSimplified 2D minimalist cartoon background illustration. Exterior of a small Vietnamese house gate at late afternoon. Flat black iron gate with vertical bars, cream-colored wall with red tile roof, simple round tree with flat green canopy, small doorbell on wall, flat grey street, flat pale orange sky. Thick bold pitch-black outlines, 100% flat solid colors, zero shading, no gradients. Pure scenery, empty exterior, strictly NO people, NO characters."
+    },
+    {
+      "name": "Cramped Rented Room",
+      "entity_type": "location",
+      "description": "Interior of tiny messy rented room. Minimalist OverSimplified 2D cartoon background. Flat dull grey-green walls, single bed with crumpled flat blue blanket, small plastic table with an instant noodle cup, empty beer cans on floor, pile of clothes on chair, small window with flat grey curtain, peeling wall patches as simple white shapes, small baby crib in corner. Muted colors, thick black outlines, pure scenery, empty environment, strictly NO people.",
+      "image_prompt": "OverSimplified 2D minimalist cartoon background illustration. Interior of a tiny messy rented room. Flat dull grey-green walls, single bed with crumpled flat blue blanket, small plastic table with noodle cup, scattered empty cans, small baby crib in corner, peeling wall patches. Thick bold uniform black outlines, 100% flat solid muted colors, completely zero shading, no gradients. Pure scenery, empty room, strictly NO people, NO characters."
+    },
+    {
+      "name": "Beer Restaurant",
+      "entity_type": "location",
+      "description": "Interior of lively Vietnamese street beer restaurant at night. Minimalist OverSimplified 2D cartoon background. Flat dark navy wall, round metal/plastic table with green beer bottles and snack plates, simple red plastic stools, string lights as flat yellow circles along a black wire, simple neon bar sign. Flat colors, thick black outlines, pure scenery, empty environment, strictly NO people.",
+      "image_prompt": "OverSimplified 2D minimalist cartoon background illustration. Interior of a Vietnamese street beer restaurant at night. Flat dark navy wall, round table with beer bottles and snack plate, red plastic stools, string lights as flat yellow circles on a black line, simple neon sign. Thick bold black outlines, 100% flat solid colors, zero shading, no gradients. Pure scenery, empty restaurant, strictly NO people, NO characters."
+    },
+    {
+      "name": "Late Night Rented Room",
+      "entity_type": "location",
+      "description": "Interior of tiny rented room at 1 AM focused near the closed entrance door. Minimalist OverSimplified 2D cartoon background. Flat dark navy blue walls, closed flat brown wooden door, round wall clock displaying 1:00, small yellow desk lamp casting a flat circular yellow light shape with no gradient, simple baby crib beside the door. Flat colors, thick black outlines, pure scenery, empty of people.",
+      "image_prompt": "OverSimplified 2D minimalist cartoon background illustration. Interior of tiny rented room at 1 AM. Flat dark blue walls, closed wooden door, round wall clock showing 1:00, single small lamp glowing as a flat yellow circle with no gradient, baby crib near door. Thick bold black outlines, flat solid dark colors, zero shading. Pure scenery, empty room, strictly NO people, NO characters."
+    },
+    {
+      "name": "Grey Morning Window",
+      "entity_type": "location",
+      "description": "Rented room window scene on cold grey morning. Minimalist OverSimplified 2D cartoon background. Flat light grey wall, simple rectangular window with flat white frame showing flat pale grey-blue sky outside, single simple wooden chair by window, small wooden table with an old mobile phone on it. Flat desaturated colors, thick black outlines, pure scenery, empty environment, strictly NO people.",
+      "image_prompt": "OverSimplified 2D minimalist cartoon background illustration. Room window on a cold grey morning. Flat light grey wall, window with flat white frame showing pale grey-blue sky, single chair beside window, small table with phone. Thick bold black outlines, flat desaturated colors, zero shading, no gradients. Pure scenery, empty room, strictly NO people, NO characters."
+    }
+  ],
+  "scenes": [
+    {
+      "display_order": 1,
+      "character_names": ["Father", "Mother", "Linh", "Parents Living Room"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Medium shot inside Parents Living Room in the evening. Father sits stiffly on the brown wooden sofa with arms crossed and a stern flat line mouth. Mother sits beside him leaning forward toward Linh with hands reaching out, worried slanted eyebrows, blue flat teardrops on cheeks. In the center, Linh stands clutching backpack straps tightly, angry downward-slanted slash eyebrows, wavy line mouth. Clean composition, empty space at top.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. Medium shot of the family living room. Father sits rigid with crossed arms. Mother leans forward with stick arms pleading, mouth opening as a small oval saying: \"Đừng đi con ơi!\". Linh stands firm with backpack, shaking her head defiantly with angry slash eyebrows.\n\nAudio: anxious female voice pleading, tense silence.\nSFX: soft clock ticking, cloth rustle.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Ngày Linh quyết định rời đi, bố chỉ im lặng, còn mẹ thì khóc cạn nước mắt can ngăn."
+    },
+    {
+      "display_order": 2,
+      "character_names": ["Mother", "Linh"],
+      "chain_type": "ROOT",
+      "duration": 3.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Close-up on Mother's round circular head filling the frame. Flat yellow blouse, hair bun on top, flat blue teardrop shapes streaming down cheeks, gentle sad eyebrows. Mother's simple black stick-figure hand reaches forward into frame, holding Linh's stick-figure hand tightly. Flat pale solid beige background.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. Extreme close-up on Mother's tearful face. Blue teardrops fall as flat animated shapes. Her stick hand trembles slightly while clasping Linh's hand, then Linh's hand slowly pulls away from her grip.\n\nAudio: soft choked sobbing sound.\nSFX: gentle hand sliding release.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Nhưng khi tuổi trẻ đã mù quáng, lời khuyên của cha mẹ chẳng thể níu bước chân cô."
+    },
+    {
+      "display_order": 3,
+      "character_names": ["Father", "Mother", "Linh", "Hung", "House Gate Exterior"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Wide shot from inside the yard looking toward House Gate Exterior at late afternoon. In the foreground, Father and Mother stand seen from behind with black stick limbs. In the distance at the open gate, Linh walks away pulling a small suitcase. Hung stands waiting beside the gate with a smug smirk line, holding Linh's shoulder. Flat pale orange sky.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. Wide shot from behind parents. Linh walks away pulling her suitcase through the iron gate. Hung smirks smugly and wraps his arm around Linh, turning to walk down the road together. Mother raises a trembling stick hand toward them, then slowly drops it.\n\nAudio: distant motorcycle engine starting, melancholic ambient wind.\nSFX: suitcase wheels rolling on pavement.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Cô bước ra khỏi cổng nhà cùng Hùng, bỏ lại sau lưng hai bóng hình già nua đứng lặng."
+    },
+    {
+      "display_order": 4,
+      "character_names": ["Linh", "Hung", "Cramped Rented Room"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Medium shot inside Cramped Rented Room. Linh in a worn grey t-shirt with a visible round pregnant belly (simple flat circle shape on pill body), messy ponytail, tired eyes with small dark circle marks, standing at small plastic table stirring instant noodle pot. In background, Hung lies flat on bed staring up at phone with lazy half-closed line eyes.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. Linh stands stirring a boiling pot with a wooden stick spoon, stopping to press her stick hand against her pregnant belly and sighing softly. In the background bed, Hung taps his glowing phone lazily, completely oblivious.\n\nAudio: quiet sigh, water boiling bubble sounds.\nSFX: spoon clinking in small metal pot, phone notification chime.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Những ngày tháng sau đó không màu hồng như Linh mơ. Bụng mang dạ chửa, cô thui thủi một mình."
+    },
+    {
+      "display_order": 5,
+      "character_names": ["Hung", "Beer Restaurant"],
+      "chain_type": "ROOT",
+      "duration": 4.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Medium shot inside Beer Restaurant at night. Hung in red jacket sitting at round table with three simple bean-shaped cartoon friends in flat colored shirts, clinking green beer bottles together. Wide open flat black oval mouths laughing loudly, simple yellow flat sparkle stars around them, flat string lights.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. Hung and his friends enthusiastically slam their beer bottles together, cheering with wide-open oval mouths: \"Uống đi anh em!\". Simple flat yellow starbursts appear around the bottles. Hung tilts his bottle back to drink with red drunk circle cheeks.\n\nAudio: boisterous male cheering, loud street bar clamor.\nSFX: glass bottles clinking sharply, liquid pouring.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Còn Hùng vẫn say sưa với những cuộc vui thâu đêm cùng bạn bè nơi quán xá."
+    },
+    {
+      "display_order": 6,
+      "character_names": ["Linh", "Baby Bin", "Late Night Rented Room"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Medium shot inside Late Night Rented Room at 1 AM. Linh sitting on a red plastic chair holding sleeping Baby Bin in her arms, facing the closed wooden door. Tired sad dot eyes, flat neutral line mouth. Round wall clock shows 1:00. Small desk lamp casts a flat yellow circle glow on floor. Flat dark blue walls.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. Linh gently rocks sleeping Baby Bin in her arms, staring fixedly at the closed door. The camera holds steady. The second hand on the wall clock ticks forward. Linh blinks slowly with tired eyes and lowers her head in deep loneliness.\n\nAudio: slow loud clock ticking, faint infant breathing.\nSFX: gentle plastic chair creak.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Nhiều đêm ôm con đợi chồng đến 1-2 giờ sáng, nước mắt Linh chỉ biết nuốt ngược vào trong."
+    },
+    {
+      "display_order": 7,
+      "character_names": ["Hung", "Linh", "Baby Bin", "Cramped Rented Room"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Dynamic two-shot inside Cramped Rented Room. Hung stands by door, face flushed with two flat red circle cheeks (drunk), wide open black oval mouth shouting with flat zigzag shout lines. Linh stands confronting him holding crying Baby Bin, blue teardrops streaming from both, angry slash eyebrows. Flat muted room colors.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. Hung stumbles forward with red drunk cheeks, pointing his stick finger aggressively shouting: \"Cô im đi!\". Baby Bin wails loudly with big open mouth and blue teardrops. Linh clutches her baby tight, eyes blazing with tears and fury.\n\nAudio: angry slurred male shouting voice, baby loud crying wail.\nSFX: heavy footstep stomp, door rattle.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Đỉnh điểm là trận cãi vã dữ dội khi Hùng say xỉn về nhà quát tháo và bỏ mặc mẹ con cô."
+    },
+    {
+      "display_order": 8,
+      "character_names": ["Linh", "Baby Bin", "Cramped Rented Room"],
+      "chain_type": "ROOT",
+      "duration": 4.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Wide shot of Cramped Rented Room after the storm. The entrance door is slammed shut with flat black motion vibration lines. Linh sits collapsed on the cold floor clutching Baby Bin tightly against her chest, head bowed in despair, flat blue teardrops. Flat desaturated muted colors.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. The door slams shut violently with flat shockwave lines. Linh slumps down to the floor, wrapping both stick arms around Baby Bin, her shoulders trembling quietly in the empty dim room.\n\nAudio: loud echoing door slam, followed by heavy silence and muffled sobs.\nSFX: door latch snap, soft thud on floor.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Tiếng đóng sầm cửa của Hùng như đập tan hoàn toàn những hy vọng cuối cùng trong Linh."
+    },
+    {
+      "display_order": 9,
+      "character_names": ["Linh", "Baby Bin", "Grey Morning Window"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Medium shot in Grey Morning Window on cold grey morning. Linh sits by the window holding an old smartphone in her stick hand, Baby Bin sleeping peacefully on her lap. The phone screen displays a tiny flat cartoon photo of Father, Mother and Linh smiling together. Flat light grey wall, pale blue-grey morning sky.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. Camera slowly pushes in on Linh. Her stick thumb gently touches the family photo on the phone screen. A single flat blue teardrop falls from her eye onto the screen. She looks down at Baby Bin and makes her decision.\n\nAudio: gentle melancholic piano notes, cold morning breeze outside.\nSFX: subtle screen tap, deep quiet breath.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Nhìn bức ảnh gia đình ngày xưa trên chiếc điện thoại cũ, Linh biết mình phải đứng dậy vì con."
+    },
+    {
+      "display_order": 10,
+      "character_names": ["Linh", "Baby Bin", "House Gate Exterior"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Medium shot outside House Gate Exterior at sunset dusk. Linh stands hesitating outside the black iron gate, holding Baby Bin in one arm, worn backpack on shoulder. Her other stick hand reaches toward the circular doorbell with small flat black trembling lines. Eyes wide with tears, flat orange-grey sky.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. Linh stands before her old family gate. Her hand trembles in the air in front of the doorbell button for two seconds, hesitating in fear and shame. Finally, she presses the small circular doorbell.\n\nAudio: distant evening crickets, quiet heartbeat pulse.\nSFX: sharp ding-dong doorbell chime echoing inside.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Trở về trước cổng nhà quen thuộc trong buổi chiều tà, lòng cô ngập tràn nỗi xấu hổ và ân hận."
+    },
+    {
+      "display_order": 11,
+      "character_names": ["Mother", "Linh", "Baby Bin", "House Gate Exterior"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Wide shot in front of House Gate Exterior. The gate swings wide open. Mother in yellow blouse rushes out with outstretched stick arms and wraps Linh and Baby Bin in a tight emotional hug. All three have flat blue tears streaming down, Mother's mouth wide open crying in joy. Warm flat orange sky.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. The iron gate swings open. Mother rushes out and throws her arms around Linh and Baby Bin, crying out: \"Linh ơi, con về rồi!\". Linh bursts into tears, resting her head on Mother's shoulder while holding Baby Bin tightly.\n\nAudio: emotional crying female voice, uplifting warm orchestral swell.\nSFX: iron gate creak, fast footsteps on gravel, emotional embrace.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Cánh cổng vừa mở, mẹ đã lao ra ôm chầm lấy hai mẹ con cô trong dòng nước mắt nghẹn ngào."
+    },
+    {
+      "display_order": 12,
+      "character_names": ["Father", "Mother", "Linh", "Baby Bin", "House Gate Exterior"],
+      "chain_type": "ROOT",
+      "duration": 5.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Full shot of the reunion in the yard. Mother holds crying Linh and Baby Bin. Father stands right behind them, one stick hand lifting to wipe a tear from his eye, then gently reaching out to lift the heavy backpack off Linh's shoulder. Warm golden yellow-orange evening light, flat colors.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. Father walks up behind Linh, pauses to wipe his eye with his sleeve, then says in a soft trembling voice: \"Vào nhà đi con.\". Father lifts the backpack off Linh's shoulder, and gently pats Baby Bin's head.\n\nAudio: gentle emotional fatherly voice, warm acoustic melody.\nSFX: backpack strap slide, soft head pat.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Bố đứng lặng phía sau, lén gạt giọt nước mắt rồi nhẹ nhàng đỡ lấy chiếc ba lô trên vai con gái."
+    },
+    {
+      "display_order": 13,
+      "character_names": ["Father", "Mother", "Linh", "Baby Bin", "Parents Living Room"],
+      "chain_type": "ROOT",
+      "duration": 4.0,
+      "prompt": "Vertical 9:16, OverSimplified 2D animated cartoon style, thick bold black outlines, flat solid 2D vector colors, zero shading. Full-frame closing shot. Inside the open doorway of the family home, flat warm golden yellow light pours outward onto the floor. The four family members (Father, Mother, Linh carrying Baby Bin) walk into the warm house together, seen from behind as small stick-figure silhouettes. Solid black outlines, flat warm colors.",
+      "video_prompt": "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. The four characters walk through the doorway into the warm yellow-lit living room. Father gently closes the wooden door behind them, shutting out the dark evening outside, ending on warm home light.\n\nAudio: warm peaceful piano chords fading out gently.\nSFX: wooden door clicking softly shut, distant warmth.\nNegative: 3D render, CGI, shadows, shading, gradients, realistic depth, subtitles, watermark, text overlay.",
+      "narrator_text": "Bởi vì dù ngoài kia giông bão thế nào, nhà vẫn luôn là nơi bình yên nhất để trở về."
+    }
+  ]
+}

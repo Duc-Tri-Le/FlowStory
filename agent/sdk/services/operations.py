@@ -961,9 +961,10 @@ async def _build_video_prompt(base_prompt: str, scene: dict, project_id: str | N
             if voices:
                 parts.append("Character voices: " + ". ".join(voices) + ".")
 
-    # Check project-level audio flags — Veo 3 Audio label format
+    # Check project-level audio flags and material-level video constraints
     allow_music = False
     allow_voice = False
+    mat_video_prefix = None
     if project_id:
         project = await crud.get_project(project_id)
         if project:
@@ -971,6 +972,15 @@ async def _build_video_prompt(base_prompt: str, scene: dict, project_id: str | N
                 allow_music = True
             if project.get("allow_voice"):
                 allow_voice = True
+            mat_id = project.get("material")
+            if mat_id:
+                from agent.services.materials import get_material
+                mat = get_material(mat_id)
+                if mat and mat.get("video_prefix"):
+                    mat_video_prefix = mat["video_prefix"]
+
+    if mat_video_prefix and mat_video_prefix.lower() not in prompt_lower:
+        parts.insert(0, mat_video_prefix)
 
     if not allow_music:
         # Only append if prompt doesn't already have Audio:/Music: labels

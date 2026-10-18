@@ -613,6 +613,7 @@ async def generate_scenes(pid: str, body: GenerateScenesRequest):
     from agent.services.materials import get_material
     material = get_material(material_id)
     scene_prefix = material["scene_prefix"] if material and material.get("scene_prefix") else "Real RAW photograph, shot on Canon EOS R5, 35mm lens."
+    video_style_prefix = f"{material['video_prefix']} " if material and material.get("video_prefix") else ""
 
     detected_scenes = _parse_script_scenes(body.prompt)
     limit = body.scene_count if body.scene_count and body.scene_count > 0 else len(detected_scenes)
@@ -631,6 +632,7 @@ async def generate_scenes(pid: str, body: GenerateScenesRequest):
         clean_text = raw_scene.replace("\n", " ").strip()
         prompt = f"{scene_prefix} In the scene, {clean_text}. Dynamic cinematic composition, natural lighting."
         video_prompt = (
+            f"{video_style_prefix}"
             f"0-3s: The scene opens with {clean_text}. The camera smoothly tracks the motion. "
             f"3-6s: Action continues with steady cinematic movement. "
             f"6-8s: The camera settles into a stable composition with natural atmospheric depth.\n\n"

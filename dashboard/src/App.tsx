@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, NavLink, Routes, Route, useLocation, useMatch, useSearchParams } from 'react-router-dom'
-import { LayoutDashboard, FolderOpen, Film, ScrollText, BookOpen, SlidersHorizontal } from 'lucide-react'
+import { LayoutDashboard, FolderOpen, Film, ScrollText, BookOpen, SlidersHorizontal, Clapperboard } from 'lucide-react'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { WebSocketProvider } from './contexts/WebSocketContext'
 import { useWebSocketContext } from './hooks/useWebSocketContext'
@@ -16,12 +16,14 @@ import LogsPage from './pages/LogsPage'
 import GalleryPage from './pages/GalleryPage'
 import GuidePage from './pages/GuidePage'
 import SettingsPage from './pages/SettingsPage'
+import StorytimePage from './pages/StorytimePage'
 import { ModelsProvider } from './contexts/ModelsContext'
 import ModelSwitcher from './components/models/ModelSwitcher'
 
 const NAV: { to: string; icon: typeof LayoutDashboard; labelKey: TranslationKey; exact: boolean }[] = [
   { to: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', exact: true },
   { to: '/projects', icon: FolderOpen, labelKey: 'nav.projects', exact: false },
+  { to: '/storytime', icon: Clapperboard, labelKey: 'nav.storytime', exact: false },
   { to: '/gallery', icon: Film, labelKey: 'nav.gallery', exact: false },
   { to: '/logs', icon: ScrollText, labelKey: 'nav.logs', exact: false },
   { to: '/guide', icon: BookOpen, labelKey: 'nav.guide', exact: false },
@@ -67,7 +69,8 @@ function useBreadcrumbs() {
       const tabKey = tab ? BREADCRUMB_TAB_KEY[tab] : undefined
       if (tabKey) crumbs.push(t(tabKey))
     }
-  } else if (loc.pathname.startsWith('/gallery')) crumbs.push(t('app.breadcrumb.gallery'))
+  } else if (loc.pathname.startsWith('/storytime')) crumbs.push(t('app.breadcrumb.storytime'))
+  else if (loc.pathname.startsWith('/gallery')) crumbs.push(t('app.breadcrumb.gallery'))
   else if (loc.pathname.startsWith('/logs')) crumbs.push(t('app.breadcrumb.logs'))
   else if (loc.pathname.startsWith('/guide')) crumbs.push(t('app.breadcrumb.guide'))
   else if (loc.pathname.startsWith('/settings')) crumbs.push(t('app.breadcrumb.settings'))
@@ -196,6 +199,7 @@ function Layout() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/projects/:id" element={<ProjectsPage />} />
+            <Route path="/storytime" element={<StorytimePage />} />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/logs" element={<LogsPage />} />
             <Route path="/guide" element={<GuidePage />} />

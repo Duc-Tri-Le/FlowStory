@@ -427,3 +427,48 @@ class TestSingleton:
         instance = init_operations(mock_client, mock_repo)
         retrieved = get_operations()
         assert retrieved is instance
+
+
+# ---------------------------------------------------------------------------
+# Test: _build_video_prompt with material video_prefix
+# ---------------------------------------------------------------------------
+
+class TestBuildVideoPrompt:
+    @pytest.mark.asyncio
+    async def test_injects_material_video_prefix_when_configured(self):
+        """_build_video_prompt prepends material's video_prefix to video prompt."""
+        from agent.sdk.services.operations import _build_video_prompt
+
+        scene = {"id": "s1", "character_names": []}
+        project = {
+            "id": "p1",
+            "material": "oversimplified_2d",
+            "allow_music": True,
+            "allow_voice": True,
+        }
+
+        with patch("agent.sdk.services.operations.crud.get_project", new_callable=AsyncMock) as mock_gp:
+            mock_gp.return_value = project
+            prompt = await _build_video_prompt("A character walks forward.", scene, "p1")
+
+        assert "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows." in prompt
+        assert prompt.startswith("Keep exact 2D flat animated style")
+
+    @pytest.mark.asyncio
+    async def test_does_not_duplicate_material_video_prefix(self):
+        """_build_video_prompt does not duplicate video_prefix if already present."""
+        from agent.sdk.services.operations import _build_video_prompt
+
+        scene = {"id": "s1", "character_names": []}
+        project = {
+            "id": "p1",
+            "material": "oversimplified_2d",
+        }
+        existing = "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows. A character walks forward."
+
+        with patch("agent.sdk.services.operations.crud.get_project", new_callable=AsyncMock) as mock_gp:
+            mock_gp.return_value = project
+            prompt = await _build_video_prompt(existing, scene, "p1")
+
+        assert prompt.count("rigid stick-figure motion") == 1
+

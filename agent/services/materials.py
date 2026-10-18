@@ -3,7 +3,7 @@
 _BUILTIN_IDS: frozenset[str] = frozenset({
     "realistic", "3d_pixar", "anime", "ghibli", "stop_motion", "minecraft",
     "oil_painting", "watercolor", "comic_book", "cyberpunk", "claymation",
-    "lego", "retro_vhs",
+    "lego", "retro_vhs", "oversimplified_2d", "cinematic_drama",
 })
 
 MATERIALS: dict[str, dict] = {
@@ -244,6 +244,57 @@ MATERIALS: dict[str, dict] = {
             "CRT curvature, nostalgic 80s grain."
         ),
         "lighting": "Warm tungsten lighting, CRT glow, analog video bloom",
+    },
+    "oversimplified_2d": {
+        "id": "oversimplified_2d",
+        "name": "OverSimplified 2D Cartoon",
+        "style_instruction": (
+            "OverSimplified 2D minimalist animated cartoon aesthetic. "
+            "Thick, bold, uniform pitch-black contour lines enclosing every shape. "
+            "Strictly flat solid 2D colors, completely zero shading, no gradients, no shadows. "
+            "Simple bean-shaped torso with no visible neck, thick straight black stick-figure limbs, "
+            "simple oval head with tiny solid black dot eyes and simple line mouth. "
+            "Clean flat vector illustration, pure solid white background."
+        ),
+        "negative_prompt": (
+            "NOT 3D render, NOT CGI, NOT realistic, NOT photorealistic, "
+            "NO shading, NO gradients, NO shadows, NO 3D depth, NO realistic anatomy, "
+            "NO fingers, NO detailed hands, NO complex muscles, NO textures, "
+            "NO text, NO labels, NO watermark."
+        ),
+        "scene_prefix": (
+            "OverSimplified 2D animated cartoon style, thick bold black outlines, "
+            "flat solid 2D vector colors, zero shading, minimalist stick-figure limbs."
+        ),
+        "video_prefix": (
+            "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows."
+        ),
+        "lighting": "Flat uniform ambient lighting, completely shadowless",
+    },
+    "cinematic_drama": {
+        "id": "cinematic_drama",
+        "name": "Cinematic Drama (Desaturated 35mm)",
+        "style_instruction": (
+            "Photorealistic cinematic live-action drama, shot on 35mm lens, shallow depth of field, "
+            "handheld camera with subtle shake, natural practical lighting, muted desaturated warm-gray color grade, "
+            "fine film grain, realistic skin texture and natural imperfections, authentic Vietnamese urban setting. "
+            "Real live-action cinema aesthetic."
+        ),
+        "negative_prompt": (
+            "NOT 3D render, NOT CGI, NOT digital art, NOT illustration, NOT anime, NOT cartoon, "
+            "NOT painting, NOT oversaturated, NOT high-gloss commercial, "
+            "NO text, NO subtitles, NO logo, NO watermark."
+        ),
+        "scene_prefix": (
+            "Photorealistic cinematic live-action drama, shot on 35mm lens, shallow depth of field, "
+            "handheld camera with subtle shake, natural practical lighting, muted desaturated color grade, "
+            "fine film grain."
+        ),
+        "video_prefix": (
+            "Cinematic live-action film footage, 35mm lens, handheld camera with subtle natural shake, "
+            "natural practical lighting, muted warm-gray desaturated tones, fine film grain, raw human emotion."
+        ),
+        "lighting": "Natural practical lighting, available interior and street light, muted warm-gray tones",
     },
 }
 
