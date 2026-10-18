@@ -11,11 +11,12 @@ import {
 import { Button } from '../ui/button'
 import { fetchAPI } from '../../api/client'
 import type { Project } from '../../types'
+import { Zap, FileText, ChevronDown, ChevronUp } from 'lucide-react'
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreated?: (project: Project) => void
+  onCreated?: (project?: Project) => void
 }
 
 const MATERIAL_OPTIONS = [
@@ -29,12 +30,37 @@ const MATERIAL_OPTIONS = [
   { id: 'comic_book', label: 'Comic Book (Truyện tranh)' },
 ]
 
+const VOICE_OPTIONS = [
+  { id: 'vi-VN-NamMinhNeural', label: '🎙️ Nam Minh (Trầm ấm Noir / Trinh thám)' },
+  { id: 'vi-VN-HoaiMyNeural', label: '🎙️ Hoài My (Cảm xúc Drama gia đình)' },
+]
+
+const DEFAULT_BATCH_INPUT = `=== Tập 1: Bí Ẩn Căn Phòng Kín ===
+Đêm hôm đó, một vụ án mạng kỳ lạ đã xảy ra ngay tại căn phòng số bảy.
+Cửa phòng bị khóa trái từ bên trong, không có bất kỳ dấu vết cạy phá nào.
+Nạn nhân là một triệu phú già, nằm gục bên bàn làm việc với chiếc đồng hồ vỡ nát.
+Kỳ lạ thay, kim đồng hồ đã dừng lại chính xác ở thời điểm mười một giờ mười lăm phút.
+
+=== Tập 2: Người Quản Gia Mất Tích ===
+Sáng hôm sau, cảnh sát phong tỏa toàn bộ khuôn viên ngôi biệt thự cổ kính.
+Người quản gia gắn bó hai mươi năm bỗng nhiên biến mất không một dấu vết.
+Trong phòng ngủ của ông ta, điều tra viên phát hiện một bức thư bị đốt dở.
+Những nét chữ còn sót lại nhắc đến một món nợ máu từ mười lăm năm trước.`
+
+const SAMPLE_SINGLE_STORY = `Mộc Tinh — Cây Biết Gọi Tên
+Đêm hôm đó, trong cánh rừng già Tây Bắc, gió rít qua những tán cây cổ thụ như tiếng ai oán than.
+Dân làng đồn rằng cây đa ngàn năm ở đầu khe suối có thể cất tiếng gọi tên người đi đêm.
+Bất kỳ ai lỡ miệng trả lời đều sẽ biến mất không dấu vết vào sáng hôm sau.
+Thanh tra Minh cầm đèn pin soi vào vết tích cào xới kỳ dị trên thân cây, linh cảm vụ án này vượt xa logic thông thường.`
+
 export default function CreateProjectModal({ open, onOpenChange, onCreated }: Props) {
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [flowUuid, setFlowUuid] = useState('')
   const [material, setMaterial] = useState('realistic')
-  const [prompt, setPrompt] = useState('')
+  const [voice, setVoice] = useState('vi-VN-NamMinhNeural')
+  const [prompt, setPrompt] = useState(DEFAULT_BATCH_INPUT)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -42,18 +68,19 @@ export default function CreateProjectModal({ open, onOpenChange, onCreated }: Pr
     setName('')
     setFlowUuid('')
     setMaterial('realistic')
-    setPrompt('')
+    setVoice('vi-VN-NamMinhNeural')
+    setPrompt(DEFAULT_BATCH_INPUT)
+    setShowAdvanced(false)
     setError(null)
   }
 
+  // Count detect episodes
+  const episodeCount = (prompt.match(/===\s*(.*?)\s*===/g) || []).length
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!name.trim()) {
-      setError('Vui lòng nhập tên dự án')
-      return
-    }
     if (!prompt.trim()) {
-      setError('Vui lòng nhập kịch bản hoặc mô tả phân cảnh ban đầu')
+      setError('Vui lòng nhập nội dung kịch bản.')
       return
     }
 
@@ -61,7 +88,6 @@ export default function CreateProjectModal({ open, onOpenChange, onCreated }: Pr
     setError(null)
 
     try {
-      // 1. Unified full-pipeline creation
       const res = await fetchAPI<{
         project?: Project
         project_id?: string
@@ -69,60 +95,33 @@ export default function CreateProjectModal({ open, onOpenChange, onCreated }: Pr
         scenes_created: number
         characters_created?: number
         pipeline_started?: boolean
+        created_count?: number
+        projects?: Project[]
       }>('/api/projects/create-with-script', {
         method: 'POST',
         body: JSON.stringify({
-          name: name.trim(),
+          name: name.trim() || (episodeCount > 1 ? 'Loạt Video Mới' : 'Dự Án Mới'),
           story: prompt.trim(),
           flow_project_id: flowUuid.trim() || undefined,
           material,
         }),
       })
 
-      const projId = res.project?.id || res.project_id
       reset()
       onOpenChange(false)
       if (res.project) onCreated?.(res.project)
-      if (projId) navigate(`/projects/${projId}`)
-      return
+      else onCreated?.()
 
-      // 2. Sequential creation:
-      // Step A: Create project with name, story, material and Google Flow UUID
-      const project = await fetchAPI<Project>('/api/projects', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: name.trim(),
-          story: prompt.trim(),
-          flow_project_id: flowUuid.trim() || undefined,
-          material,
-        }),
-      })
-
-      // Step B: Create default video
-      const video = await fetchAPI<{ id: string }>('/api/videos', {
-        method: 'POST',
-        body: JSON.stringify({
-          project_id: project.id,
-          title: name.trim(),
-          display_order: 0,
-        }),
-      })
-
-      // Step C: Generate scenes from script (server auto-detects count)
-      await fetchAPI(`/api/projects/${project.id}/generate-scenes`, {
-        method: 'POST',
-        body: JSON.stringify({
-          video_id: video.id,
-          prompt: prompt.trim(),
-        }),
-      }).catch((e: any) => console.warn('Scene generation note:', e))
-
-      reset()
-      onOpenChange(false)
-      onCreated?.(project)
-      navigate(`/projects/${project.id}`)
+      if (res.created_count && res.created_count > 1) {
+        navigate('/projects')
+      } else if (res.project_id || res.project?.id) {
+        const pid = res.project_id || res.project?.id
+        navigate(`/projects/${pid}?tab=pipeline`)
+      } else {
+        navigate('/projects')
+      }
     } catch (err: any) {
-      setError(err?.message || 'Có lỗi xảy ra khi tạo dự án')
+      setError(err?.message || 'Có lỗi xảy ra khi tạo dự án.')
     } finally {
       setLoading(false)
     }
@@ -130,70 +129,40 @@ export default function CreateProjectModal({ open, onOpenChange, onCreated }: Pr
 
   return (
     <Dialog open={open} onOpenChange={o => { if (!loading) { onOpenChange(o); if (!o) reset(); } }}>
-      <DialogContent className="max-w-[580px] p-6 gap-4" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-        <DialogHeader className="gap-1.5">
-          <DialogTitle className="text-base font-semibold tracking-wide flex items-center gap-2">
-            <span>✨</span> Tạo Dự Án Mới từ Kịch Bản
-          </DialogTitle>
-          <DialogDescription className="text-xs" style={{ color: 'var(--muted)' }}>
-            Khởi tạo dự án, gắn Google Flow UUID và tự động phân tách kịch bản thành các cảnh quay (scene).
-          </DialogDescription>
+      <DialogContent className="max-w-[680px] p-6 gap-4" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+        <DialogHeader className="gap-1.5 pb-2 border-b" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              <Zap className="w-4 h-4 fill-current" />
+            </div>
+            <div>
+              <DialogTitle className="text-base font-bold tracking-tight text-white flex items-center gap-2">
+                <span>Nạp Kịch Bản & Tạo Dự Án</span>
+                {episodeCount > 1 && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Phát hiện {episodeCount} tập
+                  </span>
+                )}
+              </DialogTitle>
+              <DialogDescription className="text-xs" style={{ color: 'var(--muted)' }}>
+                Nhập 1 tập kịch bản hoặc phân tách nhiều tập bằng dòng <code className="text-amber-300 font-mono">=== Tập X: Tên Tập ===</code>.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3.5 pt-1">
-          {/* Tên dự án */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-medium tracking-wide uppercase" style={{ color: 'var(--text)' }}>
-              Tên Dự Án <span style={{ color: 'var(--red)' }}>*</span>
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Ví dụ: Cuộc Chiến Trên Bầu Trời..."
-              disabled={loading}
-              className="w-full px-3 py-2 rounded-md text-xs outline-none transition-all"
-              style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
-            />
-          </div>
-
-          {/* Gắn Google Flow UUID */}
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-[11px] font-medium tracking-wide uppercase" style={{ color: 'var(--text)' }}>
-                Google Flow UUID <span className="text-[10px] lowercase text-muted-foreground font-normal">(tùy chọn)</span>
-              </label>
-              {flowUuid && (
-                <span className="text-[10px] font-mono" style={{ color: 'var(--accent)' }}>
-                  UUID đã nhập
-                </span>
-              )}
-            </div>
-            <input
-              type="text"
-              value={flowUuid}
-              onChange={e => setFlowUuid(e.target.value)}
-              placeholder="Dán UUID dự án Google Flow (ví dụ: f0ee1600-5085-47c8-8226-ed62673e2363)..."
-              disabled={loading}
-              className="w-full px-3 py-2 rounded-md text-xs font-mono outline-none transition-all"
-              style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
-            />
-            <span className="text-[10px] leading-tight" style={{ color: 'var(--muted)' }}>
-              💡 Dán UUID nếu bạn đã tạo dự án trên Google Flow Studio, hoặc để trống để FlowKit tự khởi tạo.
-            </span>
-          </div>
-
-          {/* Chất liệu & Phân cảnh tự động */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Controls Row: Material & Voice */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-medium tracking-wide uppercase" style={{ color: 'var(--text)' }}>
-                Chất Liệu / Phong Cách
+                Phong Cách Hình Ảnh (Material)
               </label>
               <select
                 value={material}
                 onChange={e => setMaterial(e.target.value)}
                 disabled={loading}
-                className="w-full px-3 py-2 rounded-md text-xs outline-none"
+                className="w-full px-3 py-2 rounded-lg text-xs outline-none"
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
               >
                 {MATERIAL_OPTIONS.map(m => (
@@ -204,40 +173,104 @@ export default function CreateProjectModal({ open, onOpenChange, onCreated }: Pr
 
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-medium tracking-wide uppercase" style={{ color: 'var(--text)' }}>
-                Số Lượng Scene
+                Giọng Đọc Mặc Định (TTS)
               </label>
-              <div
-                className="w-full px-3 py-2 rounded-md text-xs flex items-center gap-1.5 h-[34px]"
-                style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--accent)' }}
+              <select
+                value={voice}
+                onChange={e => setVoice(e.target.value)}
+                disabled={loading}
+                className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
               >
-                <span>⚡</span>
-                <span className="font-medium text-[11px]">Tự động đọc từ kịch bản</span>
-              </div>
+                {VOICE_OPTIONS.map(v => (
+                  <option key={v.id} value={v.id}>{v.label}</option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* Kịch bản ban đầu */}
+          {/* Kịch bản Textarea */}
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-medium tracking-wide uppercase" style={{ color: 'var(--text)' }}>
-                Kịch Bản / Phân Cảnh Ban Đầu <span style={{ color: 'var(--red)' }}>*</span>
+              <label className="text-[11px] font-medium tracking-wide uppercase flex items-center gap-1.5" style={{ color: 'var(--text)' }}>
+                <FileText className="w-3.5 h-3.5 text-amber-400" />
+                <span>Nội Dung Kịch Bản <span style={{ color: 'var(--red)' }}>*</span></span>
               </label>
-              <span className="text-[10px]" style={{ color: 'var(--muted)' }}>
-                Bối cảnh thuần: không người
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPrompt(DEFAULT_BATCH_INPUT)}
+                  className="text-[10px] text-amber-400 hover:text-amber-300 underline"
+                >
+                  Nạp mẫu 2 tập
+                </button>
+                <span className="text-slate-600">·</span>
+                <button
+                  type="button"
+                  onClick={() => setPrompt(SAMPLE_SINGLE_STORY)}
+                  className="text-[10px] text-slate-400 hover:text-slate-200 underline"
+                >
+                  Nạp mẫu 1 tập
+                </button>
+              </div>
             </div>
+
             <textarea
-              rows={6}
+              rows={9}
               value={prompt}
               onChange={e => setPrompt(e.target.value)}
-              placeholder="Nhập mô tả diễn biến câu chuyện, hoặc danh sách các cảnh bạn muốn tạo...&#10;Ví dụ:&#10;Cảnh 1: Sa mạc cát vàng mênh mông dưới ánh hoàng hôn rực đỏ (chỉ bối cảnh, không người).&#10;Cảnh 2: Một chiến binh áo choàng đen đứng trên cồn cát cao nhìn về phía thành phố cổ.&#10;Cảnh 3: Đôi mắt của chiến binh lóe sáng dưới ánh trăng đêm."
+              placeholder="Dán kịch bản vào đây...&#10;&#10;=== Tập 1: Tên Tập ===&#10;Nội dung diễn biến tập 1...&#10;&#10;=== Tập 2: Tên Tập ===&#10;Nội dung diễn biến tập 2..."
               disabled={loading}
-              className="w-full p-3 rounded-md text-xs leading-relaxed outline-none resize-y font-mono"
+              className="w-full p-3.5 rounded-xl text-xs leading-relaxed outline-none resize-y font-mono focus:border-amber-500/50 transition-all"
               style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
             />
-            <span className="text-[10px] leading-relaxed" style={{ color: 'var(--muted)' }}>
-              💡 <strong>Quy trình từng bước</strong>: Khi tạo dự án, hệ thống <strong>chỉ tạo ảnh tham chiếu</strong> để bạn duyệt trước. Sau khi thấy ảnh tham chiếu ổn định, bạn vào mục <em>Hình ảnh</em> bấm <strong>▶ Tạo tất cả ảnh</strong>, rồi tiếp tục kiểm tra và bấm <strong>▶ Tạo Video</strong>. Hệ thống không tự ý sinh ảnh cảnh hay video khi chưa có sự xác nhận của bạn.
-            </span>
+          </div>
+
+          {/* Advanced Collapsible: Custom Name & Google Flow ID */}
+          <div className="border rounded-lg px-3 py-2" style={{ borderColor: 'var(--border)', background: 'rgba(15, 23, 42, 0.4)' }}>
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="flex items-center justify-between w-full text-left text-[11px] font-medium"
+              style={{ color: 'var(--muted)' }}
+            >
+              <span>⚙️ Tùy chọn nâng cao (Tên dự án riêng, Google Flow UUID)</span>
+              {showAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+
+            {showAdvanced && (
+              <div className="flex flex-col gap-3 pt-3 mt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--text)' }}>
+                    Tên dự án tùy chỉnh (nếu muốn đặt riêng)
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="Mặc định tự nhận diện từ tiêu đề kịch bản..."
+                    disabled={loading}
+                    className="w-full px-3 py-1.5 rounded-md text-xs outline-none"
+                    style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--text)' }}>
+                    Google Flow UUID (tùy chọn)
+                  </label>
+                  <input
+                    type="text"
+                    value={flowUuid}
+                    onChange={e => setFlowUuid(e.target.value)}
+                    placeholder="Dán UUID dự án Google Flow nếu đã tạo trên Flow Studio..."
+                    disabled={loading}
+                    className="w-full px-3 py-1.5 rounded-md text-xs font-mono outline-none"
+                    style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {error && (
@@ -246,15 +279,24 @@ export default function CreateProjectModal({ open, onOpenChange, onCreated }: Pr
             </div>
           )}
 
-          <DialogFooter className="pt-2 flex items-center justify-end gap-2">
+          <DialogFooter className="pt-2 flex items-center justify-end gap-2 border-t" style={{ borderColor: 'var(--border)' }}>
             <Button type="button" variant="outline" size="sm" disabled={loading} onClick={() => onOpenChange(false)}>
               Hủy
             </Button>
-            <Button type="submit" variant="default" size="sm" disabled={loading} className="gap-1.5">
+            <Button
+              type="submit"
+              size="sm"
+              disabled={loading}
+              className="gap-1.5 font-bold shadow-md"
+              style={{ background: 'var(--accent)', color: '#fff' }}
+            >
               {loading ? (
-                <>⏳ Đang tạo dự án & kịch bản...</>
+                <>⏳ Đang phân tích & tạo dự án...</>
               ) : (
-                <>🚀 Tạo Dự Án & Kịch Bản</>
+                <>
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  <span>{episodeCount > 1 ? `Tạo ${episodeCount} Dự Án Hàng Loạt` : 'Tạo Dự Án & Phân Cảnh'}</span>
+                </>
               )}
             </Button>
           </DialogFooter>

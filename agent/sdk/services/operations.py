@@ -59,7 +59,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 # Entity types that need landscape (wide) reference images
-_LANDSCAPE_ENTITY_TYPES = {"location"}
+_LANDSCAPE_ENTITY_TYPES = {"location", "character"}
 
 
 def _resolve_scene_video_duration(scene: dict) -> int:
@@ -92,7 +92,7 @@ def _reference_aspect_ratio(entity_type: str, char: dict = None) -> str:
         if "PORT" in val or "VERT" in val:
             return "IMAGE_ASPECT_RATIO_PORTRAIT"
         prompt = (char.get("image_prompt") or "").lower()
-        if any(k in prompt for k in ("model sheet", "character sheet", "3-view", "turnaround", "horizontal", "hinh ngang", "hình ngang")):
+        if any(k in prompt for k in ("model sheet", "character sheet", "3-view", "turnaround", "horizontal", "hinh ngang", "hình ngang", "structure & composition", "3-part")):
             return "IMAGE_ASPECT_RATIO_LANDSCAPE"
 
     if entity_type in _LANDSCAPE_ENTITY_TYPES:
@@ -774,6 +774,16 @@ class OperationService:
         project = await crud.get_project(pid) if pid != "0" else None
         tier = project.get("user_paygate_tier", "PAYGATE_TIER_TWO") if project else "PAYGATE_TIER_TWO"
         aspect = _reference_aspect_ratio(entity_type, char)
+
+        # Style consistency: enforce project material style on reference generation to prevent random 2D/3D flips
+        if project and project.get("material"):
+            from agent.services.materials import get_material
+            mat = get_material(project["material"])
+            if mat and mat.get("style_instruction"):
+                style_sig = mat["style_instruction"][:20].lower()
+                if style_sig not in prompt.lower():
+                    neg = f" {mat['negative_prompt']}" if mat.get("negative_prompt") else ""
+                    prompt = f"{prompt} {mat['style_instruction']}{neg}"
 
         result = await self._client.generate_images(
             prompt=prompt, project_id=pid, aspect_ratio=aspect,

@@ -10,7 +10,7 @@ curl -s http://127.0.0.1:8100/health
 # Must return: {"extension_connected": true}
 ```
 
-## Pipeline Order
+## Pipeline Order (Human-in-the-Loop Checkpoints)
 
 ```
 0. Research          /fk-research "topic" (fact-check via web search, save to .omc/research/)
@@ -20,8 +20,30 @@ curl -s http://127.0.0.1:8100/health
 4. Create scenes     POST /api/scenes (with character_names, chain_type)
 5. Gen ref images    POST /api/requests/batch → poll /batch-status?project_id=<PID>
                      Wait for done=true, verify all entities have media_id
+
+--------------------------------------------------------------------------------------
+🛑 CHECKPOINT 1 — KIỂM TRA NHÂN VẬT & BỐI CẢNH TRÊN DASHBOARD
+   - DỪNG LẠI VÀ THÔNG BÁO CHO NGƯỜI DÙNG:
+     "Đã tạo xong nhân vật và bối cảnh (kèm ảnh tham chiếu)!
+      👉 Mời bạn vào Dashboard kiểm tra: http://localhost:5173/projects/<PID>?tab=pipeline
+      Xem xét kỹ ảnh nhân vật, bối cảnh và các câu prompt.
+      Khi bạn xác nhận 'Đồng ý' hoặc bấm 'Tạo tất cả ảnh bối cảnh', hệ thống mới tạo ảnh các cảnh."
+   - CHỈ KHI NGƯỜI DÙNG XÁC NHẬN ĐỒNG Ý thì mới chạy tiếp bước 6.
+--------------------------------------------------------------------------------------
+
 6. Gen scene images  POST /api/requests/batch → poll /batch-status?video_id=<VID>
                      Wait for done=true, verify image_media_id = UUID
+
+--------------------------------------------------------------------------------------
+🛑 CHECKPOINT 2 — KIỂM TRA ẢNH BỐI CẢNH TRƯỚC KHI TẠO VIDEO
+   - DỪNG LẠI VÀ THÔNG BÁO CHO NGƯỜI DÙNG:
+     "Đã tạo xong tất cả ảnh bối cảnh các phân cảnh!
+      👉 Mời bạn vào Dashboard kiểm tra: http://localhost:5173/projects/<PID>?tab=pipeline
+      Xem xét kỹ chất lượng từng khung hình ảnh.
+      CHỈ KHI BẠN ĐỒNG Ý thì hệ thống mới bắt đầu tạo các cảnh video (Veo 3)."
+   - CHỈ KHI NGƯỜI DÙNG XÁC NHẬN ĐỒNG Ý thì mới chạy tiếp bước 7.
+--------------------------------------------------------------------------------------
+
 7. Gen videos        POST /api/requests/batch → poll /batch-status?video_id=<VID>
                      Wait for done=true (videos take 2-5 min each)
 7.5 Review videos    POST /api/videos/{vid}/review?mode=light (AI vision quality check)

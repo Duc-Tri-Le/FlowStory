@@ -23,11 +23,18 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 COMPOSITION_GUIDELINES = {
     "character": (
-        "STRUCTURE: Divided into EXACTLY THREE EQUAL VERTICAL FRAMES separated by thin white lines. "
-        "FRAME 1 (left): Full body front view — character standing straight, arms at sides, full costume visible from head to toe, facing camera. "
-        "FRAME 2 (center): Full body back view (rear) — character facing away, identical proportions, textures and costume matching frame 1 exactly. "
-        "FRAME 3 (right): Extreme close-up of face and upper chest — ultra-realistic skin texture, eyes, hair detail, expression neutral. "
-        "Neutral solid white or light grey studio background. Strictly NO text, NO numbers, NO labels, NO titles, NO watermarks anywhere in the image."
+        "[STRUCTURE & COMPOSITION REQUIREMENT] "
+        "Strict 3-part character sheet lineup from left to right in a single continuous horizontal widescreen cinema frame: "
+        "1. (Left section): Full-body front view of the character, standing straight in a relaxed neutral pose, head-to-toe fully visible. "
+        "2. (Middle section): Full-body back view of the exact same character, showing complete rear outfit details and posture, standing straight, head-to-toe fully visible. "
+        "3. (Right section): Cinematic close-up front view of the character's head and face, capturing hyper-detailed facial features, authentic skin pores, and realistic eye reflections. "
+        "All three views must depict the exact same person with identical clothing, hairstyle, height, body proportions, and physical features. "
+        "[BACKGROUND REQUIREMENT] "
+        "Pure solid white background (#FFFFFF), completely clean, uniform, and seamless across the entire frame. "
+        "No gradients, no textures, no patterns, no shadows on the background, no environmental elements, no props, no decorative details, and no additional objects. "
+        "Absolutely no text, captions, labels, logos, watermarks, borders, or graphic elements anywhere in the image. "
+        "Maintain the three-view composition with clear visual separation between each view using only the white negative space. "
+        "Professional character reference sheet, consistent lighting, accurate anatomy, sharp details, and high-resolution rendering."
     ),
     "location": (
         "COMPOSITION: Establishing shot showing the full environment. "
@@ -73,7 +80,7 @@ def _resolve_material_id(value: str) -> str:
 
 
 def _build_character_profile(char_name: str, char_desc: str | None, story: str | None,
-                              entity_type: str = "character", material_id: str = "3d_pixar") -> dict:
+                              entity_type: str = "character", material_id: str = "realistic") -> dict:
     """Build a rich profile (description + image_prompt) for any reference entity.
 
     The image_prompt generates a reference image used as mediaId for all
@@ -93,11 +100,8 @@ def _build_character_profile(char_name: str, char_desc: str | None, story: str |
 
     if entity_type == "character":
         single_image_note = (
-            "THREE EQUAL VERTICAL FRAMES with thin white dividers: "
-            "[FRAME 1] Full body FRONT view standing straight. "
-            "[FRAME 2] Full body BACK/REAR view same proportions. "
-            "[FRAME 3] Extreme CLOSE-UP face and chest with ultra-realistic skin detail. "
-            "Absolutely NO text, NO numbers, NO labels anywhere. "
+            "Horizontal widescreen 3-part character lineup on pure solid white background #FFFFFF. "
+            "Strictly NO text, NO numbers, NO labels, NO borders anywhere. "
         )
     elif entity_type == "location":
         single_image_note = "Pure scenery and environment only. Strictly NO people, NO characters, NO human silhouettes. "
@@ -282,6 +286,13 @@ async def delete(pid: str):
     repo = _get_repo()
     if not await repo.delete_project(pid):
         raise HTTPException(404, "Project not found")
+    try:
+        from agent.api.active_project import _read_state, _clear_state
+        state = _read_state()
+        if state and state.get("project_id") == pid:
+            _clear_state()
+    except Exception:
+        pass
     return {"ok": True}
 
 
@@ -676,6 +687,27 @@ class CreateWithScriptRequest(BaseModel):
     orientation: str = "VERTICAL"
 
 
+def _parse_story_blocks(raw_text: str, default_name: str) -> list[tuple[str, str]]:
+    """Parse raw text that may contain one or multiple stories separated by === Tiêu đề ===."""
+    import re
+    if "===" in raw_text:
+        parts = re.split(r"===\s*(.*?)\s*===", raw_text)
+        stories = []
+        filtered = [p.strip() for p in parts if p.strip()]
+        for i in range(0, len(filtered) - 1, 2):
+            title = filtered[i]
+            content = filtered[i + 1]
+            if content:
+                stories.append((title, content))
+        if stories:
+            return stories
+    lines = [l.strip() for l in raw_text.splitlines() if l.strip()]
+    title = default_name.strip() if default_name and default_name.strip() else "Dự Án Mới"
+    if lines and len(lines[0]) <= 70 and len(lines) > 1 and title in ("Dự Án Mới", "Tập Video Mới"):
+        title = lines[0]
+    return [(title, raw_text.strip())]
+
+
 class CreateWithScriptResponse(BaseModel):
     project_id: str
     project_name: str
@@ -684,77 +716,91 @@ class CreateWithScriptResponse(BaseModel):
     characters_created: int
     pipeline_started: bool
     project: dict | None = None
+    created_count: int = 1
+    projects: list[dict] = []
 
 
 @router.post("/create-with-script", response_model=CreateWithScriptResponse)
 async def create_with_script(body: CreateWithScriptRequest):
-    """Create a new project, extract all entities & scenes from script, switch active project, and trigger the full auto-pipeline."""
+    """Create a new project, extract all entities & scenes from script, switch active project, and trigger the full auto-pipeline.
+    Supports single story or batch stories separated by === Tiêu đề ===.
+    """
     from agent.api.active_project import _write_state
     from agent.services.auto_pipeline import enqueue_reference_images_only
 
     flow_id = body.flow_project_id.strip() if body.flow_project_id and body.flow_project_id.strip() else None
+    story_blocks = _parse_story_blocks(body.story, body.name)
 
-    # Step 1: Extract entities if not passed explicitly
-    entities = body.characters or []
-    if not entities:
-        entities = _extract_entities_from_script(body.story, body.name)
-
-    # Step 2: Create project with all entities linked
-    proj_create = ProjectCreate(
-        name=body.name,
-        story=body.story,
-        description=body.description or body.name,
-        material=body.material,
-        flow_project_id=flow_id,
-        characters=entities,
-    )
-    project = await create(proj_create)
-
-    # Step 3: Create default video
     repo = _get_repo()
-    sdk_video = await repo.create_video(
-        project_id=project.id,
-        title=body.name,
-        display_order=0,
-        orientation=body.orientation,
-    )
+    created_projects = []
+    last_res = None
 
-    # Step 4: Create all scenes from the script
-    scenes_res = await generate_scenes(
-        project.id,
-        GenerateScenesRequest(
-            video_id=sdk_video.id,
-            prompt=body.story,
-            scene_count=body.scene_count,
-        ),
-    )
+    for title, story_text in story_blocks:
+        # Step 1: Extract entities if not passed explicitly
+        entities = body.characters or []
+        if not entities:
+            entities = _extract_entities_from_script(story_text, title)
 
-    # Step 5: Switch active project so dashboard focuses on it
-    try:
-        _write_state({"project_id": project.id})
-        logger.info("Active project switched to %s (%s)", project.name, project.id[:8])
-    except Exception as e:
-        logger.warning("Could not set active project: %s", e)
+        # Step 2: Create project with all entities linked
+        proj_create = ProjectCreate(
+            name=title,
+            story=story_text,
+            description=body.description or title,
+            material=body.material,
+            flow_project_id=flow_id,
+            characters=entities,
+        )
+        project = await create(proj_create)
 
-    # Step 6: Enqueue reference images ONLY (do NOT auto-generate scene images or videos).
-    # The user will review reference images on the dashboard, then manually click "Tạo tất cả ảnh".
-    await enqueue_reference_images_only(project.id)
+        # Step 3: Create default video
+        sdk_video = await repo.create_video(
+            project_id=project.id,
+            title=title,
+            display_order=0,
+            orientation=body.orientation,
+        )
 
-    proj_dict = {
-        "id": project.id if hasattr(project, "id") else project["id"],
-        "name": project.name if hasattr(project, "name") else project["name"],
-        "story": body.story,
-        "material": body.material,
-    }
+        # Step 4: Create all scenes from the script
+        scenes_res = await generate_scenes(
+            project.id,
+            GenerateScenesRequest(
+                video_id=sdk_video.id,
+                prompt=story_text,
+                scene_count=body.scene_count,
+            ),
+        )
+
+        # Step 5: Switch active project so dashboard focuses on the latest one
+        try:
+            _write_state({"project_id": project.id})
+            logger.info("Active project switched to %s (%s)", project.name, project.id[:8])
+        except Exception as e:
+            logger.warning("Could not set active project: %s", e)
+
+        # Step 6: Enqueue reference images ONLY
+        await enqueue_reference_images_only(project.id)
+
+        proj_dict = {
+            "id": project.id if hasattr(project, "id") else project["id"],
+            "name": project.name if hasattr(project, "name") else project["name"],
+            "story": story_text,
+            "material": body.material,
+        }
+        created_projects.append(proj_dict)
+        last_res = (proj_dict, sdk_video.id, scenes_res.created, len(entities))
+
+    first_proj, first_vid, first_scenes, first_chars = last_res
 
     return CreateWithScriptResponse(
-        project_id=proj_dict["id"],
-        project_name=proj_dict["name"],
-        video_id=sdk_video.id,
-        scenes_created=scenes_res.created,
-        characters_created=len(entities),
+        project_id=first_proj["id"],
+        project_name=first_proj["name"],
+        video_id=first_vid,
+        scenes_created=first_scenes,
+        characters_created=first_chars,
         pipeline_started=False,
-        project=proj_dict,
+        project=first_proj,
+        created_count=len(created_projects),
+        projects=created_projects,
     )
 
 
@@ -782,5 +828,29 @@ async def trigger_auto_pipeline(pid: str, orientation: str = "VERTICAL"):
         "video_id": video["id"],
         "orientation": orient,
         "active": is_pipeline_active(pid),
+    }
+
+
+@router.post("/{pid}/stop-pipeline")
+async def stop_pipeline(pid: str):
+    """Stop auto-pipeline and cancel all pending/processing requests for this project."""
+    from agent.services.auto_pipeline import stop_auto_pipeline
+    stop_auto_pipeline(pid)
+
+    from agent.db.schema import get_db, _db_lock
+    db = await get_db()
+    async with _db_lock:
+        cur = await db.execute(
+            "DELETE FROM request WHERE project_id = ? AND status IN ('PENDING', 'PROCESSING')",
+            (pid,)
+        )
+        await db.commit()
+        cancelled_count = cur.rowcount
+
+    return {
+        "ok": True,
+        "project_id": pid,
+        "status": "stopped",
+        "cancelled_requests": cancelled_count,
     }
 

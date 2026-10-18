@@ -20,6 +20,7 @@ export interface StorytimeScene {
   subtitles?: SubtitleWord[]
   background_prompt?: string
   voice?: string
+  location_id?: string // Reference to a shared location for background reuse
 }
 
 interface Props {

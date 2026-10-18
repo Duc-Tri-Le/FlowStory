@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Sparkles, Wand2, RefreshCw, Download, FileText, Mic, Film, CheckCircle2 } from 'lucide-react'
+import { Sparkles, Wand2, RefreshCw, Download, FileText, Mic, Film, CheckCircle2, MapPin, Plus, Trash2 } from 'lucide-react'
 import StorytimePlayer, { type StorytimeScene } from '../components/storytime/StorytimePlayer'
 import TextOverlayCustomizer, { type TextOverlayConfig, DEFAULT_TEXT_CONFIG } from '../components/storytime/TextOverlayCustomizer'
 import { fetchAPI, postAPI } from '../api/client'
@@ -25,6 +25,18 @@ interface VoiceGroup {
   voices: VoiceOption[]
 }
 
+export interface StoryLocation {
+  id: string
+  name: string
+  background_prompt: string
+  color: string
+}
+
+const LOCATION_COLOR_PALETTE = [
+  '#f59e0b', '#3b82f6', '#8b5cf6', '#ef4444', '#10b981',
+  '#ec4899', '#06b6d4', '#f97316', '#6366f1', '#14b8a6',
+]
+
 const DEFAULT_VOICE_GROUPS: VoiceGroup[] = [
   {
     label: '⚡ Edge-TTS (Cloud Sẵn Sàng)',
@@ -49,6 +61,7 @@ export default function StorytimePage() {
   const [voice, setVoice] = useState('vi-VN-NamMinhNeural')
   const [voiceGroups, setVoiceGroups] = useState<VoiceGroup[]>(DEFAULT_VOICE_GROUPS)
   const [scenes, setScenes] = useState<StorytimeScene[]>([])
+  const [locations, setLocations] = useState<StoryLocation[]>([])
   const [textConfig, setTextConfig] = useState<TextOverlayConfig>(DEFAULT_TEXT_CONFIG)
   const [isBreakingDown, setIsBreakingDown] = useState(false)
   const [isGeneratingTTS, setIsGeneratingTTS] = useState(false)
@@ -81,13 +94,17 @@ export default function StorytimePage() {
     setIsBreakingDown(true)
     setStatusMsg('Đang bóc tách kịch bản thành từng cảnh 10-25 từ...')
     try {
-      const res = await postAPI<{ ok: boolean; spec: { scenes: StorytimeScene[] } }>('/api/storytime/breakdown', {
+      const res = await postAPI<{ ok: boolean; spec: { scenes: StorytimeScene[]; locations?: StoryLocation[] } }>('/api/storytime/breakdown', {
         story_text: storyText,
         genre: 'trinh_tham',
       })
       if (res.ok && res.spec?.scenes) {
         setScenes(res.spec.scenes)
-        setStatusMsg(`Đã chia kịch bản thành ${res.spec.scenes.length} cảnh. Hãy bấm "Tạo Giọng & Phụ Đề"!`)
+        if (res.spec.locations?.length) {
+          setLocations(res.spec.locations)
+        }
+        const locCount = res.spec.locations?.length || 0
+        setStatusMsg(`Đã chia kịch bản thành ${res.spec.scenes.length} cảnh, ${locCount} bối cảnh. Hãy bấm "Tạo Giọng & Phụ Đề"!`)
       }
     } catch (e) {
       setStatusMsg(`Lỗi bóc tách: ${e instanceof Error ? e.message : String(e)}`)
@@ -102,12 +119,13 @@ export default function StorytimePage() {
     setIsGeneratingTTS(true)
     setStatusMsg('Đang sinh giọng đọc Edge-TTS cho từng phân cảnh và đồng bộ kịch bản...')
     try {
-      const res = await postAPI<{ ok: boolean; package: { package_id: string; scenes: StorytimeScene[] } }>(
+      const res = await postAPI<{ ok: boolean; package: { package_id: string; scenes: StorytimeScene[]; locations?: StoryLocation[] } }>(
         '/api/storytime/build-package',
         {
           title: 'Vụ Án Mới',
           genre: 'trinh_tham',
           voice: voice,
+          locations: locations.length > 0 ? locations : undefined,
           scenes: scenes.map((s, idx) => ({
             display_order: idx,
             speaker: s.speaker || 'thanh_tra',
@@ -116,11 +134,15 @@ export default function StorytimePage() {
             expression: s.expression || 'serious',
             background_prompt: s.background_prompt,
             voice: s.voice || voice,
+            location_id: s.location_id,
           })),
         }
       )
       if (res.ok && res.package) {
         setScenes(res.package.scenes)
+        if (res.package.locations?.length) {
+          setLocations(res.package.locations)
+        }
         setActivePackageId(res.package.package_id)
         setStatusMsg('Đã tạo xong Giọng đọc theo từng phân cảnh! Bấm "Phát Thử" bên phải để xem.')
       }
@@ -165,6 +187,32 @@ export default function StorytimePage() {
       return next
     })
   }
+
+  // Location management helpers
+  const addLocation = () => {
+    const idx = locations.length
+    const color = LOCATION_COLOR_PALETTE[idx % LOCATION_COLOR_PALETTE.length]
+    const newLoc: StoryLocation = {
+      id: `loc_${Date.now().toString(36)}`,
+      name: `Bối cảnh ${idx + 1}`,
+      background_prompt: 'Dark moody scene. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters.',
+      color,
+    }
+    setLocations(prev => [...prev, newLoc])
+  }
+
+  const updateLocation = (locId: string, updates: Partial<StoryLocation>) => {
+    setLocations(prev => prev.map(l => l.id === locId ? { ...l, ...updates } : l))
+  }
+
+  const deleteLocation = (locId: string) => {
+    setLocations(prev => prev.filter(l => l.id !== locId))
+    // Clear location_id from scenes referencing this location
+    setScenes(prev => prev.map(s => s.location_id === locId ? { ...s, location_id: undefined } : s))
+  }
+
+  // Count scenes per location for badge display
+  const scenesPerLocation = (locId: string) => scenes.filter(s => s.location_id === locId).length
 
   return (
     <div className="p-6 max-w-7xl mx-auto flex flex-col gap-6">
@@ -251,7 +299,86 @@ export default function StorytimePage() {
             </div>
           </div>
 
-          {/* 2. Scene List Editor */}
+          {/* 2. Location Manager */}
+          <div className="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 shadow-xl">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-amber-400" />
+                  Bối Cảnh / Locations ({locations.length})
+                </h3>
+                <p className="text-xs text-slate-500">Các cảnh cùng bối cảnh sẽ dùng chung ảnh nền</p>
+              </div>
+              <button
+                onClick={addLocation}
+                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs flex items-center gap-1.5 border border-slate-700 transition-all"
+              >
+                <Plus className="w-3 h-3" />
+                Thêm Bối Cảnh
+              </button>
+            </div>
+
+            {locations.length > 0 ? (
+              <div className="flex flex-col gap-2 max-h-[240px] overflow-y-auto pr-1">
+                {locations.map(loc => {
+                  const count = scenesPerLocation(loc.id)
+                  return (
+                    <div
+                      key={loc.id}
+                      className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 hover:border-slate-700 transition-all flex flex-col gap-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span
+                            className="w-3 h-3 rounded-full shrink-0 ring-2 ring-slate-800"
+                            style={{ backgroundColor: loc.color }}
+                          />
+                          <input
+                            type="text"
+                            value={loc.name}
+                            onChange={e => updateLocation(loc.id, { name: e.target.value })}
+                            className="bg-transparent text-slate-200 text-xs font-semibold outline-none border-b border-transparent hover:border-slate-700 focus:border-amber-500/50 min-w-0 flex-1"
+                          />
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-400">
+                            {count} cảnh
+                          </span>
+                          <input
+                            type="color"
+                            value={loc.color}
+                            onChange={e => updateLocation(loc.id, { color: e.target.value })}
+                            className="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0"
+                            title="Đổi màu badge"
+                          />
+                          <button
+                            onClick={() => deleteLocation(loc.id)}
+                            className="p-1 rounded text-slate-500 hover:text-red-400 hover:bg-slate-800 transition-all"
+                            title="Xoá bối cảnh"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                      <textarea
+                        rows={2}
+                        value={loc.background_prompt}
+                        onChange={e => updateLocation(loc.id, { background_prompt: e.target.value })}
+                        placeholder="Background prompt cho bối cảnh này..."
+                        className="w-full bg-slate-900/60 text-slate-300 text-[11px] p-2 rounded-lg border border-slate-800/60 focus:border-slate-600 outline-none resize-none leading-relaxed"
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="p-4 text-center text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl">
+                Chưa có bối cảnh. AI sẽ tự tạo khi bóc tách kịch bản, hoặc bấm "Thêm Bối Cảnh" để tạo thủ công.
+              </div>
+            )}
+          </div>
+
+          {/* 3. Scene List Editor */}
           <div className="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -280,9 +407,13 @@ export default function StorytimePage() {
                   <div
                     key={idx}
                     className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/80 hover:border-slate-700 transition-all flex flex-col gap-2.5"
+                    style={(() => {
+                      const sceneLoc = locations.find(l => l.id === scene.location_id)
+                      return sceneLoc ? { borderLeftWidth: '3px', borderLeftColor: sceneLoc.color } : undefined
+                    })()}
                   >
                     <div className="flex flex-col gap-2">
-                      {/* Card Header Row 1: Index, Speaker, Status & Single-TTS Button */}
+                      {/* Card Header Row 1: Index, Speaker, Location Badge, Status & Single-TTS Button */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 min-w-0">
                           <span className="w-5 h-5 rounded-md bg-slate-800 text-slate-300 font-mono text-[11px] flex items-center justify-center font-bold shrink-0">
@@ -291,6 +422,18 @@ export default function StorytimePage() {
                           <span className="text-xs font-semibold text-slate-300 truncate">
                             {scene.speaker === 'thanh_tra' ? 'Thanh tra Minh' : 'Người kể'}
                           </span>
+                          {(() => {
+                            const sceneLoc = locations.find(l => l.id === scene.location_id)
+                            return sceneLoc ? (
+                              <span
+                                className="text-[10px] font-medium px-1.5 py-0.5 rounded-full truncate max-w-[100px]"
+                                style={{ backgroundColor: sceneLoc.color + '20', color: sceneLoc.color, border: `1px solid ${sceneLoc.color}40` }}
+                                title={sceneLoc.name}
+                              >
+                                📍 {sceneLoc.name}
+                              </span>
+                            ) : null
+                          })()}
                           {scene.audio_url && (
                             <span className="flex items-center gap-1 text-[11px] text-emerald-400 font-medium shrink-0">
                               <CheckCircle2 className="w-3 h-3" />
@@ -324,8 +467,30 @@ export default function StorytimePage() {
                         </div>
                       </div>
 
-                      {/* Card Controls Row 2: Voice, Camera, Expression */}
-                      <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+                      {/* Card Controls Row 2: Location, Voice, Camera, Expression */}
+                      <div className="grid grid-cols-4 gap-1.5 pt-0.5">
+                        {/* Per-scene Location Selector */}
+                        <select
+                          value={scene.location_id || ''}
+                          onChange={e => {
+                            const locId = e.target.value || undefined
+                            const loc = locations.find(l => l.id === locId)
+                            updateScene(idx, {
+                              location_id: locId,
+                              background_prompt: loc?.background_prompt || scene.background_prompt,
+                            })
+                          }}
+                          className="bg-slate-900 text-slate-200 text-[11px] px-1.5 py-1 rounded border border-slate-700 outline-none truncate font-medium"
+                          title="Chọn bối cảnh cho phân cảnh này"
+                        >
+                          <option value="">📍 Không gán</option>
+                          {locations.map(loc => (
+                            <option key={loc.id} value={loc.id}>
+                              📍 {loc.name}
+                            </option>
+                          ))}
+                        </select>
+
                         {/* Per-scene Voice Selector */}
                         <select
                           value={scene.voice || voice}
@@ -424,6 +589,7 @@ export default function StorytimePage() {
                   package_id: activePackageId || 'custom_storytime',
                   exported_at: new Date().toISOString(),
                   text_overlay_config: textConfig,
+                  locations: locations,
                   scenes: scenes,
                 }
                 const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' })

@@ -37,9 +37,13 @@ Nhiệm vụ của bạn là nhận một câu chuyện hoặc kịch bản thô
    - "thinking" (trầm ngâm, nghi ngờ)
    - "talking" (nói chuyện thông thường)
    - "fear" (hoảng loạn, sợ hãi)
-5. **ẢNH NỀN (BACKGROUND PROMPT)**:
+5. **BỐI CẢNH (LOCATIONS) - QUAN TRỌNG**:
+   - Xác định tất cả bối cảnh/địa điểm KHÁC NHAU xuất hiện trong truyện.
+   - Mỗi bối cảnh chỉ định nghĩa MỘT LẦN trong mảng "locations".
+   - Mỗi scene tham chiếu đến bối cảnh bằng "location_id".
+   - Nhiều scenes CÙNG xảy ra tại một nơi sẽ DÙNG CHUNG một location_id → tiết kiệm ảnh nền.
    - Mô tả bối cảnh noir 2D tối giản, u ám, ánh sáng kịch tính (low-key lighting).
-   - BẮT BUỘC kết thúc bằng câu: "Pure scenery illustration, dark noir moody background, strictly NO people, NO characters".
+   - BẮT BUỘC kết thúc background_prompt bằng: "Pure scenery illustration, dark noir moody background, strictly NO people, NO characters".
 
 ### ĐỊNH DẠNG JSON ĐẦU RA:
 Chỉ trả về DUY NHẤT một chuỗi JSON hợp lệ (không kèm lời dẫn Markdown ngoài khối json):
@@ -54,6 +58,20 @@ Chỉ trả về DUY NHẤT một chuỗi JSON hợp lệ (không kèm lời d�
       "description": "Nhân vật người que 2D đầu tròn trắng, áo khoác măng tô xám đen, ngậm thuốc lá"
     }
   ],
+  "locations": [
+    {
+      "id": "loc_phong_nan_nhan",
+      "name": "Phòng nạn nhân",
+      "background_prompt": "Dark locked room, dim amber desk lamp, cracked clock on wall. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters.",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "loc_hanh_lang",
+      "name": "Hành lang tối",
+      "background_prompt": "Dark empty hallway with long shadows. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters.",
+      "color": "#8b5cf6"
+    }
+  ],
   "scenes": [
     {
       "display_order": 0,
@@ -61,8 +79,17 @@ Chỉ trả về DUY NHẤT một chuỗi JSON hợp lệ (không kèm lời d�
       "text": "10 đến 25 từ lời kể hoặc thoại tại đây...",
       "camera": "close",
       "expression": "serious",
-      "background_prompt": "Dark misty rainy street under a dim amber streetlamp. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters.",
+      "location_id": "loc_phong_nan_nhan",
       "sound_fx": "rain_heavy"
+    },
+    {
+      "display_order": 1,
+      "speaker": "thanh_tra",
+      "text": "Cảnh tiếp theo vẫn ở CÙNG phòng, dùng CÙNG location_id...",
+      "camera": "zoom_in",
+      "expression": "thinking",
+      "location_id": "loc_phong_nan_nhan",
+      "sound_fx": "clock_ticking"
     }
   ]
 }
@@ -70,7 +97,7 @@ Chỉ trả về DUY NHẤT một chuỗi JSON hợp lệ (không kèm lời d�
 
 
 def validate_storytime_spec(spec: dict) -> list[str]:
-    """Validate word counts, camera tags, and schema validity."""
+    """Validate word counts, camera tags, locations, and schema validity."""
     warnings = []
     scenes = spec.get("scenes", [])
     if not scenes:
@@ -78,6 +105,11 @@ def validate_storytime_spec(spec: dict) -> list[str]:
         return warnings
 
     allowed_cameras = {"close", "zoom_in", "zoom_out", "pan_right", "pan_left", "static"}
+
+    # Build locations index for cross-referencing
+    locations = {loc["id"]: loc for loc in spec.get("locations", [])}
+    if not locations:
+        warnings.append("Cảnh báo: Kịch bản không có mảng 'locations'. Các cảnh sẽ không thể dùng chung ảnh nền.")
 
     for idx, sc in enumerate(scenes):
         order = sc.get("display_order", idx)
@@ -93,8 +125,19 @@ def validate_storytime_spec(spec: dict) -> list[str]:
         if cam not in allowed_cameras:
             warnings.append(f"Cảnh #{order}: Camera '{cam}' không hợp lệ (nên dùng: {allowed_cameras}).")
 
-        bg = sc.get("background_prompt", "").lower()
-        if "no people" not in bg and "no character" not in bg:
+        # Validate location reference
+        loc_id = sc.get("location_id")
+        if loc_id and locations and loc_id not in locations:
+            warnings.append(f"Cảnh #{order}: location_id '{loc_id}' không tồn tại trong mảng locations.")
+
+        # Validate background prompt (from location or inline)
+        bg = ""
+        if loc_id and loc_id in locations:
+            bg = locations[loc_id].get("background_prompt", "").lower()
+        else:
+            bg = sc.get("background_prompt", "").lower()
+
+        if bg and "no people" not in bg and "no character" not in bg:
             warnings.append(f"Cảnh #{order}: Background prompt chưa có câu cấm người ('strictly NO people, NO characters').")
 
     return warnings

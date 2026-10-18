@@ -10,6 +10,8 @@ import { Badge } from '../components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Button } from '../components/ui/button'
 import CreateProjectModal from '../components/projects/CreateProjectModal'
+import { Trash2 } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog'
 
 type FilterTab = 'ACTIVE' | 'ARCHIVED' | 'ALL'
 
@@ -23,16 +25,35 @@ function TierBadge({ tier, t }: { tier: string | null; t: (key: TranslationKey) 
   return <Badge variant={isTwo ? 'default' : 'secondary'}>{isTwo ? t('projects.tier2') : t('projects.tier1')}</Badge>
 }
 
-function ProjectCard({ project, onClick, t }: { project: Project; onClick: () => void; t: (key: TranslationKey, params?: Record<string, string | number>) => string }) {
+function ProjectCard({
+  project,
+  onClick,
+  onDelete,
+  t,
+}: {
+  project: Project
+  onClick: () => void
+  onDelete: (e: React.MouseEvent, p: Project) => void
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string
+}) {
   return (
-    <Card className="py-4 gap-3 h-full cursor-pointer transition-opacity hover:opacity-90" onClick={onClick}>
+    <Card className="py-4 gap-3 h-full cursor-pointer transition-all hover:border-slate-700 relative group" onClick={onClick}>
       <CardHeader>
-        <CardTitle className="text-sm">{project.name}</CardTitle>
+        <CardTitle className="text-sm truncate pr-2">{project.name}</CardTitle>
         {project.description && (
           <CardDescription className="text-[11px] leading-relaxed line-clamp-2">{project.description}</CardDescription>
         )}
-        <CardAction>
+        <CardAction className="flex items-center gap-1.5">
           <TierBadge tier={project.user_paygate_tier} t={t} />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-slate-400 hover:text-red-400 hover:bg-red-500/15 opacity-60 group-hover:opacity-100 transition-opacity"
+            title="Xóa dự án này"
+            onClick={(e) => onDelete(e, project)}
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
         </CardAction>
       </CardHeader>
       <CardContent>
@@ -56,6 +77,8 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [openCreate, setOpenCreate] = useState(false)
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const loadProjects = () => {
     fetchAPI<Project[]>('/api/projects')
@@ -67,6 +90,20 @@ export default function ProjectsPage() {
   useEffect(() => {
     loadProjects()
   }, [])
+
+  const handleDeleteProject = async () => {
+    if (!projectToDelete) return
+    setDeleting(true)
+    try {
+      await fetchAPI(`/api/projects/${projectToDelete.id}`, { method: 'DELETE' })
+      setProjectToDelete(null)
+      loadProjects()
+    } catch (e) {
+      console.error('Failed to delete project:', e)
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   // If there's an :id param, show detail page
   if (id) {
@@ -107,7 +144,16 @@ export default function ProjectsPage() {
       ) : (
         <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
           {filtered.map(p => (
-            <ProjectCard key={p.id} project={p} onClick={() => navigate(`/projects/${p.id}`)} t={t} />
+            <ProjectCard
+              key={p.id}
+              project={p}
+              onClick={() => navigate(`/projects/${p.id}`)}
+              onDelete={(e) => {
+                e.stopPropagation()
+                setProjectToDelete(p)
+              }}
+              t={t}
+            />
           ))}
         </div>
       )}
@@ -117,6 +163,37 @@ export default function ProjectsPage() {
         onOpenChange={setOpenCreate}
         onCreated={() => loadProjects()}
       />
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={!!projectToDelete} onOpenChange={(open) => !open && setProjectToDelete(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-400">
+              <Trash2 className="w-5 h-5 text-red-500" />
+              <span>Xóa dự án?</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs pt-2 leading-relaxed" style={{ color: 'var(--muted)' }}>
+              Bạn có chắc chắn muốn xóa dự án <strong>"{projectToDelete?.name}"</strong>?
+              <br />
+              Tất cả các phân cảnh, nhân vật, bối cảnh và video liên quan sẽ bị xóa khỏi hệ thống. Thao tác này không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0 pt-3">
+            <Button variant="ghost" size="sm" onClick={() => setProjectToDelete(null)} disabled={deleting}>
+              Hủy
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleDeleteProject}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-500 text-white"
+            >
+              {deleting ? 'Đang xóa...' : 'Xác nhận xóa'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

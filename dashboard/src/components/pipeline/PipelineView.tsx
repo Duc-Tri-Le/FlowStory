@@ -13,6 +13,7 @@ import StageNode from './StageNode'
 import SceneCard from './SceneCard'
 import SceneDetailSheet from './SceneDetailSheet'
 import GenerateVideoDialog from './GenerateVideoDialog'
+import { CheckCircle2, ArrowRight } from 'lucide-react'
 
 type StageKey = 'refs' | 'image' | 'video' | 'upscale'
 
@@ -50,6 +51,7 @@ export default function PipelineView({ projectId, videoId }: PipelineViewProps) 
   const [reviewRunning, setReviewRunning] = useState<{ sceneId: string; mode: 'light' | 'deep' } | null>(null)
   const [reviewError, setReviewError] = useState<string | null>(null)
   const [retryingSceneId, setRetryingSceneId] = useState<string | null>(null)
+  const [generatingRefs, setGeneratingRefs] = useState(false)
   const [generatingImages, setGeneratingImages] = useState(false)
   const [generatingVideos, setGeneratingVideos] = useState(false)
   const [videoDialogOpen, setVideoDialogOpen] = useState(false)
@@ -82,6 +84,13 @@ export default function PipelineView({ projectId, videoId }: PipelineViewProps) 
     }
   }, [lastEvent, load])
 
+  // If characters exist and any lack reference image/media_id, focus on refs stage first
+  useEffect(() => {
+    if (characters.length > 0 && characters.some(c => !c.reference_image_url && !c.media_id)) {
+      setActiveStage('refs')
+    }
+  }, [characters])
+
   const videoRequests = requests.filter(r => r.video_id === videoId)
   const anyProcessing = videoRequests.some(r => r.status === 'PROCESSING')
   const pendingCount = videoRequests.filter(r => r.status === 'PENDING').length
@@ -92,6 +101,15 @@ export default function PipelineView({ projectId, videoId }: PipelineViewProps) 
     video: count(scenes.map(s => sceneStageStatus(s, 'video'))),
     upscale: count(scenes.map(s => sceneStageStatus(s, 'upscale'))),
   }
+
+  const allRefsDone = characters.length > 0 && characters.every(c => c.reference_image_url || charStatus(c, requests) === 'COMPLETED')
+  const anyRefProcessing = characters.some(c => charStatus(c, requests) === 'PROCESSING')
+
+  const allImagesDone = scenes.length > 0 && scenes.every(s => sceneStageStatus(s, 'image') === 'COMPLETED')
+  const anyImageProcessing = scenes.some(s => sceneStageStatus(s, 'image') === 'PROCESSING')
+
+  const allVideosDone = scenes.length > 0 && scenes.every(s => sceneStageStatus(s, 'video') === 'COMPLETED')
+  const anyVideoProcessing = scenes.some(s => sceneStageStatus(s, 'video') === 'PROCESSING')
 
   let gridScenes = scenes.slice()
   if (activeStage !== 'refs' && sortFailedFirst) {
@@ -163,6 +181,26 @@ export default function PipelineView({ projectId, videoId }: PipelineViewProps) 
     }
   }
 
+  async function handleGenerateAllRefs() {
+    const uncompleted = characters.filter(c => !c.reference_image_url || charStatus(c, requests) !== 'COMPLETED')
+    const toGen = uncompleted.length > 0 ? uncompleted : characters
+    if (!toGen.length) return
+    setGeneratingRefs(true)
+    try {
+      const reqs = toGen.map(c => ({
+        type: 'GENERATE_CHARACTER_IMAGE',
+        character_id: c.id,
+        project_id: projectId,
+      }))
+      await postAPI('/api/requests/batch', { requests: reqs })
+      await load()
+    } catch (e) {
+      console.error('Failed to generate character reference images:', e)
+    } finally {
+      setGeneratingRefs(false)
+    }
+  }
+
   async function handleGenerateAllVideos(sceneIds: string[]) {
     if (!sceneIds.length) return
     setGeneratingVideos(true)
@@ -202,6 +240,15 @@ export default function PipelineView({ projectId, videoId }: PipelineViewProps) 
       console.error('Failed to generate scene images:', e)
     } finally {
       setGeneratingImages(false)
+    }
+  }
+
+  async function handleStopPipeline() {
+    try {
+      await postAPI(`/api/projects/${projectId}/stop-pipeline`, {})
+      await load()
+    } catch (e) {
+      console.error('Failed to stop pipeline:', e)
     }
   }
 
@@ -256,6 +303,17 @@ export default function PipelineView({ projectId, videoId }: PipelineViewProps) 
               {stateLabel(t, anyProcessing ? 'RUNNING' : 'IDLE')}
             </span>
             <span className="text-[11px]" style={{ color: 'var(--muted)' }}>· {t('pipeline.queue', { n: pendingCount })}</span>
+            {(anyProcessing || pendingCount > 0) && (
+              <Button
+                variant="destructive"
+                size="sm"
+                className="h-6 px-2 text-[10px] ml-1 bg-red-600/90 hover:bg-red-600 text-white gap-1"
+                onClick={handleStopPipeline}
+                title="Dừng xử lý và xóa toàn bộ hàng đợi đang chờ"
+              >
+                <span>🛑 Dừng</span>
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -275,27 +333,222 @@ export default function PipelineView({ projectId, videoId }: PipelineViewProps) 
         ))}
       </div>
 
+      {/* Human-in-the-Loop Checkpoint Guidance Banner */}
+      <div
+        className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl shadow-lg transition-all"
+        style={{
+          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%)',
+          border: '1px solid rgba(148, 163, 184, 0.15)',
+        }}
+      >
+        <div className="flex items-start gap-3.5">
+          <div
+            className="flex items-center justify-center w-8 h-8 rounded-lg font-bold text-xs shrink-0 mt-0.5"
+            style={{
+              background: activeStage === 'refs' ? 'rgba(245, 158, 11, 0.2)' : activeStage === 'image' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+              color: activeStage === 'refs' ? '#f59e0b' : activeStage === 'image' ? '#60a5fa' : '#34d399',
+              border: `1px solid ${activeStage === 'refs' ? 'rgba(245, 158, 11, 0.4)' : activeStage === 'image' ? 'rgba(59, 130, 246, 0.4)' : 'rgba(16, 185, 129, 0.4)'}`,
+            }}
+          >
+            {activeStage === 'refs' ? '01' : activeStage === 'image' ? '02' : '03'}
+          </div>
+          <div className="flex flex-col gap-1">
+            <div className="text-xs font-semibold flex items-center gap-2 flex-wrap" style={{ color: 'var(--text)' }}>
+              {activeStage === 'refs' && (
+                <>
+                  <span>🔍 Chặng 1: Kiểm tra Nhân vật & Bối cảnh</span>
+                  {allRefsDone ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                      ✓ Đã có ảnh tham chiếu
+                    </span>
+                  ) : anyRefProcessing ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium animate-pulse" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                      ⏳ Đang tạo ảnh ({stageBreakdown.refs.done}/{stageBreakdown.refs.total})
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8' }}>
+                      Chờ kiểm tra ({stageBreakdown.refs.done}/{stageBreakdown.refs.total})
+                    </span>
+                  )}
+                </>
+              )}
+              {activeStage === 'image' && (
+                <>
+                  <span>🖼️ Chặng 2: Kiểm tra Ảnh bối cảnh các phân cảnh</span>
+                  {allImagesDone ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                      ✓ Tất cả ảnh đã hoàn tất
+                    </span>
+                  ) : anyImageProcessing ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium animate-pulse" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                      ⏳ Đang tạo ảnh ({stageBreakdown.image.done}/{stageBreakdown.image.total})
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8' }}>
+                      Chờ tạo ảnh ({stageBreakdown.image.done}/{stageBreakdown.image.total})
+                    </span>
+                  )}
+                </>
+              )}
+              {activeStage === 'video' && (
+                <>
+                  <span>🎬 Chặng 3: Tạo Video chuyển động các phân cảnh</span>
+                  {allVideosDone ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                      ✓ Hoàn thành tất cả video
+                    </span>
+                  ) : anyVideoProcessing ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium animate-pulse" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                      ⏳ Đang render video ({stageBreakdown.video.done}/{stageBreakdown.video.total})
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8' }}>
+                      Chờ bạn duyệt tạo video
+                    </span>
+                  )}
+                </>
+              )}
+              {activeStage === 'upscale' && (
+                <span>💎 Chặng 4: Nâng cấp chất lượng 4K</span>
+              )}
+            </div>
+            <p className="text-[11px] m-0" style={{ color: 'var(--muted)' }}>
+              {activeStage === 'refs' &&
+                'Xem xét kỹ ảnh tham chiếu nhân vật và thông tin bối cảnh bên dưới. Khi đã ưng ý, bấm nút bên phải để bắt đầu tạo ảnh bối cảnh.'}
+              {activeStage === 'image' &&
+                (allImagesDone
+                  ? 'Tất cả ảnh bối cảnh đã xong! Hãy duyệt kỹ từng khung hình bên dưới. Khi bạn đồng ý, bấm nút bên phải để bắt đầu tạo video.'
+                  : 'Kiểm tra mô tả prompt ảnh cảnh bên dưới. Bấm nút bên phải để tiến hành tạo ảnh cho các phân cảnh.')}
+              {activeStage === 'video' &&
+                'Chỉ tạo video sau khi bạn đã kiểm tra và đồng ý với ảnh bối cảnh ở bước trước.'}
+              {activeStage === 'upscale' &&
+                'Nâng cấp độ phân giải các video đã hoàn thành lên 4K.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Stage Checkpoint Action Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+          {activeStage === 'refs' && (
+            <>
+              {!allRefsDone && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={generatingRefs || anyRefProcessing}
+                  onClick={handleGenerateAllRefs}
+                  className="text-xs h-8"
+                >
+                  {generatingRefs || anyRefProcessing ? 'Đang gửi...' : '▶ Tạo tất cả ảnh nhân vật'}
+                </Button>
+              )}
+              <Button
+                size="sm"
+                onClick={() => {
+                  setActiveStage('image')
+                  if (!allImagesDone && !anyImageProcessing && stageBreakdown.image.done === 0) {
+                    handleGenerateAllImages()
+                  }
+                }}
+                style={{ background: 'var(--accent)', color: '#fff' }}
+                className="text-xs h-8 font-semibold flex items-center gap-1.5 shadow-md"
+              >
+                <span>Tiếp tục: Tạo ảnh bối cảnh</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </>
+          )}
+
+          {activeStage === 'image' && (
+            <>
+              {!allImagesDone && (
+                <Button
+                  size="sm"
+                  disabled={generatingImages || anyImageProcessing}
+                  onClick={handleGenerateAllImages}
+                  style={{ background: 'var(--accent)', color: '#fff' }}
+                  className="text-xs h-8"
+                >
+                  {generatingImages || anyImageProcessing ? 'Đang gửi...' : '▶ Tạo tất cả ảnh bối cảnh'}
+                </Button>
+              )}
+              {allImagesDone && (
+                <Button
+                  size="sm"
+                  onClick={() => setVideoDialogOpen(true)}
+                  className="text-xs h-8 font-semibold flex items-center gap-1.5 shadow-md"
+                  style={{ background: '#10b981', color: '#fff' }}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Tôi đồng ý, Tạo Video các cảnh →</span>
+                </Button>
+              )}
+            </>
+          )}
+
+          {activeStage === 'video' && (
+            <Button
+              size="sm"
+              disabled={generatingVideos || anyVideoProcessing}
+              onClick={() => setVideoDialogOpen(true)}
+              style={{ background: 'var(--accent)', color: '#fff' }}
+              className="text-xs h-8"
+            >
+              {generatingVideos || anyVideoProcessing ? 'Đang gửi...' : '▶ Tạo Video'}
+            </Button>
+          )}
+        </div>
+      </div>
+
       {/* Sort toggle + scene/refs grid */}
       {activeStage === 'refs' ? (
         <div>
-          <div className="text-xs mb-2.5 font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-            {t('pipeline.refsHeading', { n: characters.length })}
+          <div className="flex items-center justify-between gap-4 mb-2.5">
+            <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
+              {t('pipeline.refsHeading', { n: characters.length })}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={generatingRefs || anyRefProcessing}
+                onClick={handleGenerateAllRefs}
+                className="text-xs h-7"
+              >
+                {generatingRefs || anyRefProcessing ? 'Đang gửi...' : '▶ Tạo tất cả ảnh nhân vật'}
+              </Button>
+            </div>
           </div>
-          <div className="grid gap-2.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
+          <div className="grid gap-2.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
             {characters.map(c => {
               const st = charStatus(c, requests)
+              const isLoc = c.entity_type === 'location'
               return (
-                <div key={c.id} className="flex flex-col gap-1.5 p-2.5 rounded-md text-xs" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-                  <div className="w-full rounded overflow-hidden flex items-center justify-center" style={{ aspectRatio: '3/4', background: 'var(--surface)', maxHeight: '100px' }}>
+                <div key={c.id} className="flex flex-col gap-1.5 p-3 rounded-lg text-xs" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+                  <div className="w-full rounded overflow-hidden flex items-center justify-center relative" style={{ aspectRatio: '16/9', background: '#090a0f', maxHeight: '130px' }}>
                     {c.reference_image_url ? (
-                      <img src={c.reference_image_url} alt={c.name} className="w-full h-full object-cover" />
+                      <img src={c.reference_image_url} alt={c.name} className="w-full h-full object-contain bg-white" />
                     ) : (
                       <span style={{ color: 'var(--muted)', fontSize: '10px' }}>{t('pipeline.noImage')}</span>
                     )}
+                    <span
+                      className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[9px] font-medium border"
+                      style={{
+                        background: isLoc ? 'rgba(59, 130, 246, 0.85)' : 'rgba(245, 158, 11, 0.85)',
+                        color: '#fff',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                      }}
+                    >
+                      {isLoc ? '📍 Bối cảnh' : '👤 Nhân vật'}
+                    </span>
                   </div>
-                  <div className="font-semibold truncate" style={{ color: 'var(--text)' }}>{c.name}</div>
-                  <div style={{ color: 'var(--muted)', fontSize: '10px' }}>{c.entity_type}</div>
-                  <div className="flex items-center gap-1.5" style={{ fontSize: '10px' }}>
+                  <div className="font-semibold truncate text-xs" style={{ color: 'var(--text)' }} title={c.name}>{c.name}</div>
+                  {c.description && (
+                    <div className="text-[10px] line-clamp-2 leading-relaxed" style={{ color: 'var(--muted)' }} title={c.description}>
+                      {c.description}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5 pt-1" style={{ fontSize: '10px' }}>
                     <span className="w-1.5 h-1.5 rounded-full" style={{ background: `var(--${st === 'COMPLETED' ? 'green' : st === 'PROCESSING' ? 'yellow' : st === 'FAILED' ? 'red' : 'border'})` }} />
                     <span style={{ color: 'var(--muted)' }}>{statusLabel(t, st)}</span>
                   </div>

@@ -51,6 +51,14 @@ class AlignRequest(BaseModel):
     filename: str
 
 
+class LocationInput(BaseModel):
+    """A reusable location/set for multiple scenes."""
+    id: str  # e.g. "loc_phong_lam_viec"
+    name: str  # e.g. "Phòng làm việc triệu phú"
+    background_prompt: str
+    color: Optional[str] = None  # Badge color for UI, e.g. "#f59e0b"
+
+
 class SceneInput(BaseModel):
     display_order: int
     speaker: str = "thanh_tra"
@@ -59,6 +67,7 @@ class SceneInput(BaseModel):
     expression: str = "serious"
     background_prompt: Optional[str] = None
     voice: Optional[str] = None
+    location_id: Optional[str] = None  # Reference to a LocationInput.id
 
 
 class PackageRequest(BaseModel):
@@ -66,6 +75,7 @@ class PackageRequest(BaseModel):
     genre: str = "trinh_tham"
     voice: str = "vi-VN-NamMinhNeural"
     scenes: List[SceneInput]
+    locations: Optional[List[LocationInput]] = None
 
 
 @router.post("/breakdown")
@@ -84,8 +94,21 @@ async def api_breakdown(req: BreakdownRequest):
         return {"ok": True, "spec": spec, "warnings": warnings}
     except Exception as e:
         logger.warning("AI CLI breakdown failed (%s), using smart sentence splitting fallback", e)
-        # Smart fallback: split story into 15-word chunks
+        # Smart fallback: split story into sentences and auto-assign locations
         sentences = re.split(r"(?<=[.!?])\s+", text)
+
+        # Auto-detect location keywords to group scenes
+        LOCATION_KEYWORDS = {
+            "phòng": {"id": "loc_phong", "name": "Căn phòng", "prompt": "Dark locked room, dim amber desk lamp, scattered papers, cracked clock on wall. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters.", "color": "#f59e0b"},
+            "đường": {"id": "loc_duong", "name": "Đường phố", "prompt": "Dark misty rainy street under a dim amber streetlamp, wet cobblestones. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters.", "color": "#3b82f6"},
+            "cửa": {"id": "loc_phong", "name": "Căn phòng", "prompt": "Dark locked room, dim amber desk lamp, scattered papers, cracked clock on wall. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters.", "color": "#f59e0b"},
+            "bàn": {"id": "loc_phong", "name": "Căn phòng", "prompt": "Dark locked room, dim amber desk lamp, scattered papers, cracked clock on wall. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters.", "color": "#f59e0b"},
+            "ngôi nhà": {"id": "loc_ngoai_nha", "name": "Ngoại cảnh ngôi nhà", "prompt": "Dark Victorian mansion exterior at night, iron gate, flickering porch light. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters.", "color": "#8b5cf6"},
+            "biến mất": {"id": "loc_hanh_lang", "name": "Hành lang tối", "prompt": "Dark empty hallway with long shadows, single swinging light bulb. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters.", "color": "#ef4444"},
+        }
+        DEFAULT_LOC = {"id": "loc_default", "name": "Hiện trường vụ án", "prompt": "Dark detective room, rainy window. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters.", "color": "#64748b"}
+
+        locations_map: Dict[str, Dict] = {}
         scenes = []
         for i, s in enumerate(sentences):
             clean = s.strip()
@@ -93,14 +116,33 @@ async def api_breakdown(req: BreakdownRequest):
                 continue
             cam = "close" if any(w in clean.lower() for w in ["chết", "máu", "án mạng", "bất ngờ", "sốc", "hung thủ", "biến mất"]) else "zoom_in"
             exp = "shocked" if cam == "close" else "serious"
+
+            # Find best matching location
+            matched_loc = DEFAULT_LOC
+            for kw, loc_data in LOCATION_KEYWORDS.items():
+                if kw in clean.lower():
+                    matched_loc = loc_data
+                    break
+
+            loc_id = matched_loc["id"]
+            if loc_id not in locations_map:
+                locations_map[loc_id] = {
+                    "id": loc_id,
+                    "name": matched_loc["name"],
+                    "background_prompt": matched_loc["prompt"],
+                    "color": matched_loc.get("color", "#64748b"),
+                }
+
             scenes.append({
                 "display_order": i,
                 "speaker": "thanh_tra",
                 "text": clean,
                 "camera": cam,
                 "expression": exp,
-                "background_prompt": "Dark detective room, rainy window. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters."
+                "background_prompt": matched_loc["prompt"],
+                "location_id": loc_id,
             })
+
         fallback_spec = {
             "title": "Vụ Án Trinh Thám",
             "genre": req.genre,
@@ -111,6 +153,7 @@ async def api_breakdown(req: BreakdownRequest):
                     "description": "Nhân vật người que 2D đầu tròn trắng, áo măng tô than chì"
                 }
             ],
+            "locations": list(locations_map.values()),
             "scenes": scenes,
         }
         return {"ok": True, "spec": fallback_spec, "is_fallback": True}
@@ -180,6 +223,17 @@ async def api_build_package(req: PackageRequest):
     audio_dir = pkg_dir / "audio"
     audio_dir.mkdir(parents=True, exist_ok=True)
 
+    # Build locations lookup from request (if provided)
+    locations_lookup: Dict[str, Dict] = {}
+    if req.locations:
+        for loc in req.locations:
+            locations_lookup[loc.id] = {
+                "id": loc.id,
+                "name": loc.name,
+                "background_prompt": loc.background_prompt,
+                "color": loc.color or "#64748b",
+            }
+
     # 1. Edge-TTS Batch
     tts_items = [
         {
@@ -190,6 +244,7 @@ async def api_build_package(req: PackageRequest):
             "expression": s.expression,
             "background_prompt": s.background_prompt,
             "voice": s.voice or req.voice,
+            "location_id": s.location_id,
         }
         for s in req.scenes
     ]
@@ -212,6 +267,12 @@ async def api_build_package(req: PackageRequest):
         frame_count = int(padded_dur * fps)
         audio_name = Path(sc["audio_path"]).name if sc.get("audio_path") else None
 
+        # Resolve background_prompt from location if scene has location_id
+        loc_id = sc.get("location_id")
+        bg_prompt = sc.get("background_prompt", "")
+        if loc_id and loc_id in locations_lookup:
+            bg_prompt = bg_prompt or locations_lookup[loc_id]["background_prompt"]
+
         final_scenes.append({
             "id": sc["display_order"],
             "speaker": sc.get("speaker", "thanh_tra"),
@@ -225,10 +286,25 @@ async def api_build_package(req: PackageRequest):
             "start_frame": total_frames,
             "end_frame": total_frames + frame_count,
             "subtitles": sc.get("subtitles", []),
-            "background_prompt": sc.get("background_prompt", ""),
+            "background_prompt": bg_prompt,
+            "location_id": loc_id,
         })
         total_frames += frame_count
         total_duration += padded_dur
+
+    # 4. Build unique locations list for package
+    # Auto-detect from scenes if no explicit locations provided
+    if not locations_lookup:
+        for sc in final_scenes:
+            bg = sc.get("background_prompt", "")
+            lid = sc.get("location_id")
+            if bg and lid and lid not in locations_lookup:
+                locations_lookup[lid] = {
+                    "id": lid,
+                    "name": lid.replace("loc_", "").replace("_", " ").title(),
+                    "background_prompt": bg,
+                    "color": "#64748b",
+                }
 
     package_data = {
         "package_id": package_id,
@@ -239,6 +315,7 @@ async def api_build_package(req: PackageRequest):
         "height": 1080,
         "total_duration_seconds": round(total_duration, 2),
         "total_frames": total_frames,
+        "locations": list(locations_lookup.values()),
         "scenes": final_scenes,
     }
 
@@ -359,8 +436,14 @@ async def api_batch_create(req: BatchStoriesRequest):
         if not text:
             continue
         
-        # 1. Breakdown text into scenes
+        # 1. Breakdown text into scenes with auto-location detection
         sentences = re.split(r"(?<=[.!?])\s+", text)
+        default_loc = LocationInput(
+            id="loc_default",
+            name="Hiện trường vụ án",
+            background_prompt="Dark detective room. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters.",
+            color="#64748b",
+        )
         scenes = []
         for i, sentence in enumerate(sentences):
             clean = sentence.strip()
@@ -374,7 +457,8 @@ async def api_batch_create(req: BatchStoriesRequest):
                 text=clean,
                 camera=cam,
                 expression=exp,
-                background_prompt="Dark detective room. Pure scenery illustration, dark noir moody background, strictly NO people, NO characters."
+                background_prompt=default_loc.background_prompt,
+                location_id=default_loc.id,
             ))
         
         # 2. Build package
@@ -382,16 +466,61 @@ async def api_batch_create(req: BatchStoriesRequest):
             title=title,
             genre="trinh_tham",
             voice=s.voice or "vi-VN-NamMinhNeural",
-            scenes=scenes
+            scenes=scenes,
+            locations=[default_loc],
         )
         try:
             pkg_res = await api_build_package(pkg_req)
             if pkg_res.get("ok"):
+                pkg_data = pkg_res["package"]
+                pkg_id = pkg_data["package_id"]
+
+                # Also create in SQLite database so it appears in /projects
+                project_id = None
+                try:
+                    from agent.db import crud
+                    from agent.api.active_project import _write_state
+                    proj = await crud.create_project(
+                        name=title,
+                        story=text[:3000],
+                        description=f"Gói kịch bản Storytime ({len(pkg_data['scenes'])} cảnh, {round(pkg_data['total_duration_seconds']/60, 1)} phút)",
+                        material="realistic",
+                        allow_voice=True,
+                    )
+                    vid = await crud.create_video(
+                        project_id=proj["id"],
+                        title=title,
+                        display_order=0,
+                        orientation="VERTICAL",
+                    )
+                    for sc_idx, sc_item in enumerate(pkg_data["scenes"]):
+                        txt = sc_item.get("text", "")
+                        bg = sc_item.get("background_prompt", "")
+                        dur = sc_item.get("duration_seconds", 4.0)
+                        cam = sc_item.get("camera", "zoom_in")
+                        exp = sc_item.get("expression", "serious")
+                        s_rec = await crud.create_scene(
+                            video_id=vid["id"],
+                            display_order=sc_idx,
+                            prompt=txt,
+                            image_prompt=bg,
+                            video_prompt=f"{txt}. Camera: {cam}. Expression: {exp}.",
+                            duration=dur,
+                        )
+                        if txt:
+                            await crud.update_scene(s_rec["id"], narrator_text=txt)
+
+                    _write_state({"project_id": proj["id"]})
+                    project_id = proj["id"]
+                except Exception as db_err:
+                    logger.warning("Could not create SQLite project for storytime package %s: %s", pkg_id, db_err)
+
                 results.append({
                     "title": title,
-                    "package_id": pkg_res["package"]["package_id"],
-                    "scenes_count": len(pkg_res["package"]["scenes"]),
-                    "total_duration": pkg_res["package"]["total_duration_seconds"],
+                    "package_id": pkg_id,
+                    "project_id": project_id,
+                    "scenes_count": len(pkg_data["scenes"]),
+                    "total_duration": pkg_data["total_duration_seconds"],
                     "status": "COMPLETED",
                 })
         except Exception as e:

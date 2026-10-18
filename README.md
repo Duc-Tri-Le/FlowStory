@@ -1,12 +1,3 @@
-```bash
-./setup.sh
-```
-
-This checks and installs: Python 3.10+, pip, ffmpeg, ffprobe, Chrome, creates venv, installs dependencies, verifies imports.
-
-> **Windows:** Use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (`wsl --install`) or Git Bash. All bash scripts and commands assume a Unix shell.
-
-### Manual setup
 
 ```bash
 # Prerequisites: Python 3.10+, ffmpeg, Chrome
@@ -33,3 +24,7 @@ curl http://127.0.0.1:8100/health
 curl http://127.0.0.1:8100/api/flow/status
 # {"connected":true,"transport":"batch","flow_project_id":"…","flow_key_present":false}
 ```
+curl.exe -s http://127.0.0.1:8100/api/projects
+http://127.0.0.1:8100/docs
+http://127.0.0.1:8100/redoc
+http://127.0.0.1:8100/openapi.json

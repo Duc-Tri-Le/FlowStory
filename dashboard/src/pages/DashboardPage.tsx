@@ -2,21 +2,21 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   Layers,
   Film,
-  Sparkles,
   Plus,
   Trash2,
   Download,
-  RefreshCw,
   CheckCircle2,
   Clock,
-  Mic,
-  Zap,
   Play,
-  FileText
+  Zap,
+  Mic,
+  Sparkles,
+  RefreshCw,
 } from 'lucide-react'
 import StorytimePlayer, { type StorytimeScene } from '../components/storytime/StorytimePlayer'
 import TextOverlayCustomizer, { type TextOverlayConfig, DEFAULT_TEXT_CONFIG } from '../components/storytime/TextOverlayCustomizer'
-import { fetchAPI, postAPI } from '../api/client'
+import { fetchAPI } from '../api/client'
+import CreateProjectModal from '../components/projects/CreateProjectModal'
 
 interface PackageItem {
   package_id: string
@@ -28,31 +28,16 @@ interface PackageItem {
   is_sample?: boolean
 }
 
-const DEFAULT_BATCH_INPUT = `=== Tập 1: Bí Ẩn Căn Phòng Kín ===
-Đêm hôm đó, một vụ án mạng kỳ lạ đã xảy ra ngay tại căn phòng số bảy.
-Cửa phòng bị khóa trái từ bên trong, không có bất kỳ dấu vết cạy phá nào.
-Nạn nhân là một triệu phú già, nằm gục bên bàn làm việc với chiếc đồng hồ vỡ nát.
-Kỳ lạ thay, kim đồng hồ đã dừng lại chính xác ở thời điểm mười một giờ mười lăm phút.
-
-=== Tập 2: Người Quản Gia Mất Tích ===
-Sáng hôm sau, cảnh sát phong tỏa toàn bộ khuôn viên ngôi biệt thự cổ kính.
-Người quản gia gắn bó hai mươi năm bỗng nhiên biến mất không một dấu vết.
-Trong phòng ngủ của ông ta, điều tra viên phát hiện một bức thư bị đốt dở.
-Những nét chữ còn sót lại nhắc đến một món nợ máu từ mười lăm năm trước.`
-
 export default function DashboardPage() {
   const [packages, setPackages] = useState<PackageItem[]>([])
   const [selectedPackageId, setSelectedPackageId] = useState<string>('sample')
   const [currentScenes, setCurrentScenes] = useState<StorytimeScene[]>([])
   const [textConfig, setTextConfig] = useState<TextOverlayConfig>(DEFAULT_TEXT_CONFIG)
   const [loading, setLoading] = useState(true)
-
-  // Batch import state
-  const [showBatchModal, setShowBatchModal] = useState(false)
-  const [batchText, setBatchText] = useState(DEFAULT_BATCH_INPUT)
-  const [voice, setVoice] = useState('vi-VN-NamMinhNeural')
-  const [isProcessingBatch, setIsProcessingBatch] = useState(false)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
+
+  // Modal state
+  const [showBatchModal, setShowBatchModal] = useState(false)
 
   // Load packages list
   const loadPackages = useCallback(async () => {
@@ -98,48 +83,6 @@ export default function DashboardPage() {
     loadPackages()
     loadPackageScenes('sample')
   }, [loadPackages, loadPackageScenes])
-
-  // Handle Batch Creation
-  const handleRunBatch = async () => {
-    if (!batchText.trim()) return
-    setIsProcessingBatch(true)
-    setStatusMessage('Đang phân tích kịch bản hàng loạt, tạo giọng đọc và phụ đề Whisper...')
-
-    // Parse stories separated by === Tiêu đề ===
-    const rawBlocks = batchText.split(/===\s*(.*?)\s*===/g).filter(Boolean)
-    const stories: { title: string; story_text: string; voice: string }[] = []
-
-    for (let i = 0; i < rawBlocks.length; i += 2) {
-      const title = rawBlocks[i]?.trim() || `Tập ${stories.length + 1}`
-      const text = rawBlocks[i + 1]?.trim() || ''
-      if (text) {
-        stories.push({ title, story_text: text, voice })
-      }
-    }
-
-    if (!stories.length) {
-      // If no === header found, treat whole text as 1 story
-      stories.push({ title: 'Tập Video Mới', story_text: batchText.trim(), voice })
-    }
-
-    try {
-      const res = await postAPI<{ ok: boolean; created: PackageItem[] }>('/api/storytime/batch-create', {
-        stories,
-      })
-      if (res.ok && res.created?.length) {
-        setStatusMessage(`Đã sản xuất thành công ${res.created.length} tập video!`)
-        setShowBatchModal(false)
-        await loadPackages()
-        if (res.created[0]?.package_id) {
-          loadPackageScenes(res.created[0].package_id)
-        }
-      }
-    } catch (e) {
-      setStatusMessage(`Lỗi xử lý hàng loạt: ${e instanceof Error ? e.message : String(e)}`)
-    } finally {
-      setIsProcessingBatch(false)
-    }
-  }
 
   // Delete Package
   const handleDelete = async (pkgId: string, e: React.MouseEvent) => {
@@ -426,76 +369,14 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 4. Batch Import Modal */}
-      {showBatchModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-amber-400" />
-                <h3 className="text-base font-bold text-white">Nạp Kịch Bản Hàng Loạt (Batch Importer)</h3>
-              </div>
-              <button
-                onClick={() => setShowBatchModal(false)}
-                className="text-slate-400 hover:text-white text-sm"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-400">
-              Dán nhiều câu chuyện/tập kịch bản vào khung dưới đây. Phân tách từng tập bằng dòng{' '}
-              <code className="text-amber-300 font-mono">=== Tập X: Tên Tập ===</code>.
-            </p>
-
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-400">Giọng đọc toàn bộ:</span>
-              <select
-                value={voice}
-                onChange={e => setVoice(e.target.value)}
-                className="bg-slate-950 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 outline-none"
-              >
-                <option value="vi-VN-NamMinhNeural">Nam Minh (Trầm ấm Trinh thám / Noir)</option>
-                <option value="vi-VN-HoaiMyNeural">Hoài My (Cảm xúc Drama gia đình)</option>
-              </select>
-            </div>
-
-            <textarea
-              rows={12}
-              value={batchText}
-              onChange={e => setBatchText(e.target.value)}
-              className="w-full bg-slate-950 text-slate-200 text-xs p-4 rounded-xl border border-slate-800 focus:border-amber-500/50 outline-none font-mono resize-none leading-relaxed"
-            />
-
-            <div className="flex items-center justify-between pt-2 border-t border-slate-800">
-              <button
-                onClick={() => setBatchText(DEFAULT_BATCH_INPUT)}
-                className="text-xs text-slate-400 hover:text-slate-200 underline"
-              >
-                Khôi phục văn bản mẫu 2 tập
-              </button>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowBatchModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-medium"
-                >
-                  Hủy
-                </button>
-
-                <button
-                  onClick={handleRunBatch}
-                  disabled={isProcessingBatch || !batchText.trim()}
-                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 disabled:opacity-40"
-                >
-                  {isProcessingBatch ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 fill-current" />}
-                  <span>{isProcessingBatch ? 'Đang chạy hàng loạt...' : 'Bắt Đầu Chạy Hàng Loạt'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 4. Unified Batch & Project Creator Modal */}
+      <CreateProjectModal
+        open={showBatchModal}
+        onOpenChange={setShowBatchModal}
+        onCreated={() => {
+          loadPackages()
+        }}
+      />
     </div>
   )
 }

@@ -205,3 +205,11 @@ def start_auto_pipeline(project_id: str, video_id: str, orientation: str = "VERT
 def is_pipeline_active(project_id: str) -> bool:
     task = _active_pipelines.get(project_id)
     return task is not None and not task.done()
+
+
+def stop_auto_pipeline(project_id: str):
+    """Stop and cancel the active auto-pipeline task for a project."""
+    task = _active_pipelines.pop(project_id, None)
+    if task and not task.done():
+        task.cancel()
+        logger.info("Auto-pipeline task cancelled for project %s", project_id[:8])
