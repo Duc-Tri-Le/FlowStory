@@ -320,29 +320,29 @@ MATERIALS: dict[str, dict] = {
     },
     "oversimplified_2d": {
         "id": "oversimplified_2d",
-        "name": "OverSimplified 2D Cartoon",
+        "name": "Hoạt Hình 2D Người Que Tối Giản (OverSimplified & Dark Folklore)",
         "style_instruction": (
-            "OverSimplified 2D minimalist animated cartoon aesthetic. "
-            "Thick, bold, uniform pitch-black contour lines enclosing every shape. "
-            "Strictly flat solid 2D colors, completely zero shading, no gradients, no shadows. "
-            "Simple bean-shaped torso with no visible neck, thick straight black stick-figure limbs, "
-            "simple oval head with tiny solid black dot eyes and simple line mouth. "
-            "Clean flat vector illustration, pure solid white background."
+            "OverSimplified 2D minimalist cutout animation aesthetic with dark folk mystery undertones. "
+            "Characters: minimalist chibi stick figures with flat elliptic bean-shaped torso, simple black stick-figure line limbs, "
+            "oversized round head with stylized chibi proportions. Hair, wrinkles, and clothing rendered as flat solid color blocks with thick bold black ink outlines. "
+            "Monsters, beasts and uncanny animals (e.g. dog, rooster, cat, pig, goat, or folk creature): striking uncanny contrast drawn in detailed semi-realistic dark fantasy manga/anime style with eerie macabre details, grotesque biological textures, and unsettling sinister eyes tailored to the specific beast without forced horns. Intentional stark contrast against minimalist human stick figures. "
+            "Background: textured digital ink wash and matte painterly folklore environment (decayed wood grain, peeling stone walls, muddy ground) with soft depth and painterly bleed. "
+            "Color palette: cold and murky folklore tones (ash gray, midnight navy/cyan, murky earth brown, pitch black), punctuated by eerie blood crimson or stark fiery amber-orange contrast. "
+            "Pure 2D paper cutout aesthetic, strictly NO 3D rendering."
         ),
         "negative_prompt": (
-            "NOT 3D render, NOT CGI, NOT realistic, NOT photorealistic, "
-            "NO shading, NO gradients, NO shadows, NO 3D depth, NO realistic anatomy, "
-            "NO fingers, NO detailed hands, NO complex muscles, NO textures, "
-            "NO text, NO labels, NO watermark."
+            "NOT 3D render, NOT CGI, NOT photorealistic human skin, NO 3D shading on characters, "
+            "NO 3D gradients on characters, NO 3D volume, NO realistic human faces on stick figures, "
+            "NO text, NO subtitles, NO watermark, NO logo, NO blurry background noise."
         ),
         "scene_prefix": (
-            "OverSimplified 2D animated cartoon style, thick bold black outlines, "
-            "flat solid 2D vector colors, zero shading, minimalist stick-figure limbs."
+            "2D minimalist cutout folk animation style, flat chibi stick-figure characters with thick bold black outlines, "
+            "textured painterly background, cold murky folklore palette with high-contrast focal points."
         ),
         "video_prefix": (
             "Keep exact 2D flat animated style, 2D vector animation, rigid stick-figure motion, strictly flat colors, no 3D depth, no shadows."
         ),
-        "lighting": "Flat uniform ambient lighting, completely shadowless",
+        "lighting": "Moody cold ambient lighting, muted murky folklore horror tones with stark focal contrast (crimson glow or harsh fiery amber against cold midnight shadows)",
     },
     "cinematic_drama": {
         "id": "cinematic_drama",

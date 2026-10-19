@@ -20,9 +20,9 @@ interface Props {
 }
 
 const MATERIAL_OPTIONS = [
+  { id: 'oversimplified_2d', label: '⭐ Hoạt Hình 2D Người Que Tối Giản (OverSimplified & Dark Folklore)' },
   { id: 'realistic', label: 'Photorealistic (Điện ảnh chân thực)' },
   { id: 'cinematic_drama', label: 'Cinematic Drama (Phim truyền hình 35mm)' },
-  { id: 'oversimplified_2d', label: 'OverSimplified 2D (Hoạt hình 2D Storytime)' },
   { id: '3d_pixar', label: '3D Pixar (Hoạt hình 3D Pixar)' },
   { id: 'anime', label: 'Anime (Anime Nhật Bản)' },
   { id: 'anime_comedy', label: 'Anime Comedy (Hoạt hình hài hước)' },
@@ -43,29 +43,29 @@ const VOICE_OPTIONS = [
   { id: 'vi-VN-HoaiMyNeural', label: '🎙️ Hoài My (Cảm xúc Drama gia đình)' },
 ]
 
-const DEFAULT_BATCH_INPUT = `=== Tập 1: Bí Ẩn Căn Phòng Kín ===
-Đêm hôm đó, một vụ án mạng kỳ lạ đã xảy ra ngay tại căn phòng số bảy.
-Cửa phòng bị khóa trái từ bên trong, không có bất kỳ dấu vết cạy phá nào.
-Nạn nhân là một triệu phú già, nằm gục bên bàn làm việc với chiếc đồng hồ vỡ nát.
-Kỳ lạ thay, kim đồng hồ đã dừng lại chính xác ở thời điểm mười một giờ mười lăm phút.
+const DEFAULT_BATCH_INPUT = `=== Tập 1: Bóng Đen Gian Chuồng Cũ ===
+Đêm hôm đó, giữa cơn mưa bão xối xả, Lão Tam nghe thấy tiếng cào xé kỳ lạ phát ra sau gian chuồng cũ.
+Cầm ngọn đèn dầu rọi vào bóng tối, ông bàng hoàng nhận ra đôi mắt đỏ quỷ dị của con quái thú đang nhìn mình trừng trừng.
+Tiếng gầm rùng rợn xé toạc màn mưa khiến người nông dân kinh hồn bạt vía.
+Lão Tam ngã quỵ xuống đất, run rẩy tìm đường tháo chạy trong bóng đêm mịt mùng.
 
-=== Tập 2: Người Quản Gia Mất Tích ===
-Sáng hôm sau, cảnh sát phong tỏa toàn bộ khuôn viên ngôi biệt thự cổ kính.
-Người quản gia gắn bó hai mươi năm bỗng nhiên biến mất không một dấu vết.
-Trong phòng ngủ của ông ta, điều tra viên phát hiện một bức thư bị đốt dở.
-Những nét chữ còn sót lại nhắc đến một món nợ máu từ mười lăm năm trước.`
+=== Tập 2: Dấu Chân Kỳ Dị Ven Rừng ===
+Sáng hôm sau, khi cơn bão vừa dứt, dân làng kéo nhau ra gian chuồng củi hoang tàn.
+Trên nền đất bùn nhão nhoét xuất hiện những vệt móng vuốt cào xé sâu hoắm dọc theo vách gỗ mục nát.
+Lão Tam hớt hải chỉ tay về phía cánh rừng rậm u ám phủ đầy sương lạnh.
+Mọi người đều nín lặng khi nhận ra vết chân quái thú đang dẫn thẳng vào sâu trong hang tối.`
 
-const SAMPLE_SINGLE_STORY = `Mộc Tinh — Cây Biết Gọi Tên
-Đêm hôm đó, trong cánh rừng già Tây Bắc, gió rít qua những tán cây cổ thụ như tiếng ai oán than.
-Dân làng đồn rằng cây đa ngàn năm ở đầu khe suối có thể cất tiếng gọi tên người đi đêm.
-Bất kỳ ai lỡ miệng trả lời đều sẽ biến mất không dấu vết vào sáng hôm sau.
-Thanh tra Minh cầm đèn pin soi vào vết tích cào xới kỳ dị trên thân cây, linh cảm vụ án này vượt xa logic thông thường.`
+const SAMPLE_SINGLE_STORY = `Bóng Đen Gian Chuồng Cũ (Hoạt Hình 2D Dân Gian)
+Đêm hôm đó, giữa cơn mưa bão xối xả, Lão Tam nghe thấy tiếng cào xé kỳ lạ sau gian chuồng cũ.
+Cầm ngọn đèn dầu rọi vào bóng tối, ông bàng hoàng nhận ra đôi mắt đỏ quỷ dị của con quái thú đang nhìn mình trừng trừng.
+Con quái thú nhe hàm nanh sắc nhọn gầm lên một tiếng rùng rợn xé toạc màn đêm.
+Lão Tam hốt hoảng vứt cả chiếc đèn dầu, cuống cuồng tháo chạy trong nỗi kinh hoàng tột độ.`
 
 export default function CreateProjectModal({ open, onOpenChange, onCreated }: Props) {
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [flowUuid, setFlowUuid] = useState('')
-  const [material, setMaterial] = useState('realistic')
+  const [material, setMaterial] = useState('oversimplified_2d')
   const [orientation, setOrientation] = useState<'HORIZONTAL' | 'VERTICAL'>('HORIZONTAL')
   const [voice, setVoice] = useState('vi-VN-NamMinhNeural')
   const [prompt, setPrompt] = useState(DEFAULT_BATCH_INPUT)
@@ -76,7 +76,7 @@ export default function CreateProjectModal({ open, onOpenChange, onCreated }: Pr
   function reset() {
     setName('')
     setFlowUuid('')
-    setMaterial('realistic')
+    setMaterial('oversimplified_2d')
     setOrientation('HORIZONTAL')
     setVoice('vi-VN-NamMinhNeural')
     setPrompt(DEFAULT_BATCH_INPUT)

@@ -98,18 +98,52 @@ def _build_character_profile(char_name: str, char_desc: str | None, story: str |
     base_desc = char_desc or char_name
     composition = COMPOSITION_GUIDELINES.get(entity_type, COMPOSITION_GUIDELINES["character"])
 
+    is_2d_storytime = (material_id == "oversimplified_2d")
+
     if entity_type == "character":
-        single_image_note = (
-            "Horizontal widescreen 3-part character lineup on pure solid white background #FFFFFF. "
-            "Strictly NO text, NO numbers, NO labels, NO borders anywhere. "
-        )
+        if is_2d_storytime:
+            single_image_note = (
+                "Minimalist chibi stick-figure character turnaround model sheet (front, 3/4, side view) on pure solid white background #FFFFFF. "
+                "Large round head with stylized chibi proportions, flat elliptic bean-shaped torso, simple black stick-figure line limbs. "
+                "Hair, facial details, and clothing rendered as flat solid color blocks with thick bold black ink outlines. "
+                "Pure 2D paper cutout style, zero 3D shading, strictly NO text, NO numbers, NO labels, NO borders anywhere. "
+            )
+        else:
+            single_image_note = (
+                "Horizontal widescreen 3-part character lineup on pure solid white background #FFFFFF. "
+                "Strictly NO text, NO numbers, NO labels, NO borders anywhere. "
+            )
+    elif entity_type in ("creature", "monster"):
+        if is_2d_storytime:
+            single_image_note = (
+                f"Dark uncanny {char_name} beast character model sheet on pure solid white background #FFFFFF. "
+                f"High-detail semi-realistic dark fantasy manga/anime style, eerie macabre biological textures, "
+                f"grotesque animalistic anatomy, and unsettling sinister unearthly eyes matching the specific beast ({base_desc}). "
+                f"No horns unless explicitly requested. "
+                f"Striking uncanny contrast against minimalist stick-figure characters. Strictly NO text, NO numbers, NO labels, NO borders anywhere. "
+            )
+        else:
+            single_image_note = "ONE single clean reference image only, NOT a multi-panel grid. "
     elif entity_type == "location":
-        single_image_note = "Pure scenery and environment only. Strictly NO people, NO characters, NO human silhouettes. "
+        if is_2d_storytime:
+            single_image_note = (
+                "Textured digital ink wash and matte painterly folklore environment. "
+                "Decayed rustic textures (weathered wood grain, peeling stone walls, muddy ground), subtle depth and soft painterly bleed, cold murky folklore color palette. "
+                "Pure scenery and architecture only, strictly NO people, NO characters, NO human silhouettes. "
+            )
+        else:
+            single_image_note = "Pure scenery and environment only. Strictly NO people, NO characters, NO human silhouettes. "
     elif entity_type == "visual_asset":
-        single_image_note = (
-            "ONE single clean isolated object centered on a pure solid white background only, NOT a multi-panel grid. "
-            "Strictly NO people, NO hands holding it, NO background elements, NO text, NO labels. "
-        )
+        if is_2d_storytime:
+            single_image_note = (
+                "ONE single clean isolated 2D cutout prop centered on pure solid white background only, NOT a multi-panel grid. "
+                "Bold black outlines, flat colors with subtle texture. Strictly NO people, NO hands holding it, NO background elements, NO text, NO labels. "
+            )
+        else:
+            single_image_note = (
+                "ONE single clean isolated object centered on a pure solid white background only, NOT a multi-panel grid. "
+                "Strictly NO people, NO hands holding it, NO background elements, NO text, NO labels. "
+            )
     else:
         single_image_note = "ONE single clean reference image only, NOT a multi-panel grid. "
 
@@ -641,16 +675,29 @@ async def generate_scenes(pid: str, body: GenerateScenesRequest):
             matched_chars = char_names[:2]
 
         clean_text = raw_scene.replace("\n", " ").strip()
-        prompt = f"{scene_prefix} In the scene, {clean_text}. Dynamic cinematic composition, natural lighting."
-        video_prompt = (
-            f"{video_style_prefix}"
-            f"0-3s: The scene opens with {clean_text}. The camera smoothly tracks the motion. "
-            f"3-6s: Action continues with steady cinematic movement. "
-            f"6-8s: The camera settles into a stable composition with natural atmospheric depth.\n\n"
-            f"Audio: natural environmental ambiance.\n"
-            f"SFX: subtle Foley movement sounds.\n"
-            f"Negative: subtitles, watermark, text overlay."
-        )
+        is_2d_storytime = (material_id == "oversimplified_2d")
+        if is_2d_storytime:
+            prompt = f"{scene_prefix} Scene action: {clean_text}. 2D cutout stick-figure composition, painterly murky folklore background, flat high-contrast lighting."
+            video_prompt = (
+                f"{video_style_prefix}"
+                f"0-3s: The 2D cutout scene opens with {clean_text}, characters moving with intentional slightly rigid 2D paper puppet joints.\n"
+                f"3-6s: Action unfolds according to narrative: {clean_text}. Expressive character tension and folk cutout animation pacing.\n"
+                f"6-8s: The scene settles into an evocative 2D folklore composition matching the story mood.\n\n"
+                f"Audio: atmospheric folklore ambiance.\n"
+                f"SFX: subtle environmental sounds.\n"
+                f"Negative: 3D render, photorealistic, realistic human skin, CGI depth, subtitles, watermark, text overlay."
+            )
+        else:
+            prompt = f"{scene_prefix} In the scene, {clean_text}. Dynamic cinematic composition, natural lighting."
+            video_prompt = (
+                f"{video_style_prefix}"
+                f"0-3s: The scene opens with {clean_text}. The camera smoothly tracks the motion. "
+                f"3-6s: Action continues with steady cinematic movement. "
+                f"6-8s: The camera settles into a stable composition with natural atmospheric depth.\n\n"
+                f"Audio: natural environmental ambiance.\n"
+                f"SFX: subtle Foley movement sounds.\n"
+                f"Negative: subtitles, watermark, text overlay."
+            )
 
         sdk_scene = await repo.create_scene(
             video_id=body.video_id,
@@ -819,13 +866,15 @@ async def trigger_auto_pipeline(pid: str, orientation: str = "VERTICAL"):
         raise HTTPException(400, "Project has no video to run pipeline on")
 
     video = videos[0]
-    orient = orientation or video.get("orientation") or "VERTICAL"
-    task = start_auto_pipeline(pid, video["id"], orientation=orient)
+    vid = getattr(video, "id", None) or (video.get("id") if isinstance(video, dict) else None)
+    vid_orient = getattr(video, "orientation", None) or (video.get("orientation") if isinstance(video, dict) else None)
+    orient = orientation or vid_orient or "VERTICAL"
+    task = start_auto_pipeline(pid, vid, orientation=orient)
 
     return {
         "status": "started",
         "project_id": pid,
-        "video_id": video["id"],
+        "video_id": vid,
         "orientation": orient,
         "active": is_pipeline_active(pid),
     }

@@ -15,7 +15,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, UploadFile, File
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -655,8 +655,8 @@ async def list_packages():
             sdata = json.loads(sample_file.read_text(encoding="utf-8"))
             packages.append({
                 "package_id": "sample",
-                "title": sdata.get("title", "Bí Ẩn Vụ Án Căn Phòng Kín"),
-                "genre": sdata.get("genre", "trinh_tham"),
+                "title": sdata.get("title", "Bóng Đen Gian Chuồng Cũ (Hoạt Hình 2D Dân Gian)"),
+                "genre": sdata.get("genre", "folklore_2d"),
                 "scenes_count": len(sdata.get("scenes", [])),
                 "total_duration": sdata.get("total_duration_seconds", 12.0),
                 "status": "COMPLETED",
@@ -812,7 +812,7 @@ async def api_batch_create(req: BatchStoriesRequest):
 
 @router.get("/sample-package")
 async def get_sample_package():
-    """Return pre-generated sample detective mystery package for instant preview."""
+    """Return pre-generated sample 2D folklore stickman package for instant preview."""
     sample_file = OUTPUT_DIR / "sample_remotion_dist" / "remotion_input.json"
     if sample_file.exists():
         try:
@@ -835,3 +835,96 @@ async def serve_sample_audio(filename: str):
     if not path.exists():
         raise HTTPException(404, "Sample audio not found")
     return FileResponse(str(path), media_type="audio/mpeg")
+
+
+@router.get("/preview-video/{filename}")
+async def serve_preview_video(filename: str):
+    """Serve real preview video MP4."""
+    p1 = OUTPUT_DIR / "sample_remotion_dist" / filename
+    p2 = OUTPUT_DIR / "preview" / filename
+    path = p1 if p1.exists() else p2 if p2.exists() else None
+    if not path or not path.exists():
+        fallback = OUTPUT_DIR / "sample_remotion_dist" / "sample.mp4"
+        if fallback.exists():
+            return FileResponse(str(fallback), media_type="video/mp4")
+        raise HTTPException(404, "Preview video not found")
+    return FileResponse(str(path), media_type="video/mp4")
+
+
+class FetchFlowVideoRequest(BaseModel):
+    uuid: str
+
+
+@router.post("/fetch-flow-video")
+async def fetch_flow_video(body: FetchFlowVideoRequest):
+    """Attempt to download a video directly from Google Flow using its UUID."""
+    uuid_str = body.uuid.strip()
+    if not uuid_str:
+        raise HTTPException(400, "UUID is required")
+
+    from agent.services.flow_client import get_flow_client
+    import aiohttp
+    client = get_flow_client()
+
+    preview_dir = OUTPUT_DIR / "preview"
+    preview_dir.mkdir(parents=True, exist_ok=True)
+    target_mp4 = preview_dir / f"{uuid_str}.mp4"
+
+    # 1. If extension is connected, fetch via get_media API
+    if client.connected:
+        try:
+            result = await client.get_media(uuid_str)
+            data = result.get("data", result)
+            video = data.get("video") if isinstance(data.get("video"), dict) else {}
+            url = video.get("fifeUrl") or data.get("fifeUrl")
+            if url:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url) as resp:
+                        if resp.status == 200:
+                            content = await resp.read()
+                            target_mp4.write_bytes(content)
+                            return {
+                                "ok": True,
+                                "source": "flow_api",
+                                "video_url": f"/api/storytime/preview-video/{uuid_str}.mp4",
+                                "bytes": len(content),
+                            }
+        except Exception as e:
+            logger.warning("Failed to fetch via extension: %s", e)
+
+    # 2. If target_mp4 already exists locally in preview/
+    if target_mp4.exists() and target_mp4.stat().st_size > 0:
+        return {
+            "ok": True,
+            "source": "local_cache",
+            "video_url": f"/api/storytime/preview-video/{uuid_str}.mp4",
+        }
+
+    # 3. Extension not connected instruction
+    return {
+        "ok": False,
+        "extension_connected": client.connected,
+        "uuid": uuid_str,
+        "error": "extension_not_connected",
+        "message": (
+            "Chrome Extension chưa kết nối tới ws://127.0.0.1:9222. "
+            "Để tải video tự động từ Google Flow: Mở Chrome -> chrome://extensions -> Bật Developer Mode -> 'Load unpacked' chọn thư mục 'd:\\code\\FlowStory\\extension' -> mở tab flow.google.com. "
+            "Hoặc bạn có thể tải video về máy từ Google Flow và dùng nút 'Tải tệp .mp4' bên dưới để xem trực tiếp."
+        ),
+    }
+
+
+@router.post("/upload-preview-video")
+async def upload_preview_video(file: UploadFile = File(...)):
+    """Upload a local video file (e.g. downloaded from Google Flow) for instant preview."""
+    preview_dir = OUTPUT_DIR / "preview"
+    preview_dir.mkdir(parents=True, exist_ok=True)
+    target = preview_dir / "uploaded_preview.mp4"
+    content = await file.read()
+    target.write_bytes(content)
+    return {
+        "ok": True,
+        "video_url": "/api/storytime/preview-video/uploaded_preview.mp4",
+        "size": len(content),
+    }
+

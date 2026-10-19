@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Sparkles, Wand2, RefreshCw, Download, FileText, Mic, Film, CheckCircle2, MapPin, Plus, Trash2, Users } from 'lucide-react'
-import StorytimePlayer, { type StorytimeScene, type StoryCharacter } from '../components/storytime/StorytimePlayer'
+import RealVideoPlayer from '../components/storytime/RealVideoPlayer'
+import { type StorytimeScene, type StoryCharacter } from '../components/storytime/StorytimePlayer'
 import TextOverlayCustomizer, { type TextOverlayConfig, DEFAULT_TEXT_CONFIG } from '../components/storytime/TextOverlayCustomizer'
 import { fetchAPI, postAPI } from '../api/client'
 
-const SAMPLE_DETECTIVE_STORY = `Đêm hôm đó, một vụ án mạng kỳ lạ đã xảy ra ngay tại căn phòng số bảy.
-Thanh tra Minh bước lại gần và chất vấn: "Quản gia Lâm, lúc mười một giờ đêm đó ông ở đâu?"
-Quản gia Lâm sợ hãi xua tay: "Oan cho tôi quá, lúc đó tôi đang ở dưới tầng hầm kiểm tra kho rượu!"
-Bất ngờ, quản gia vùng chạy trốn thục mạng ra phía hành lang tối, thám tử Minh liền lao theo truy bắt!
-Nhân chứng Mai bàng hoàng chỉ tay: "Hắn ta chính là kẻ vừa giấu chiếc đồng hồ vỡ nát của nạn nhân!"`
+const SAMPLE_FOLKLORE_STORY = `Đêm hôm đó, giữa cơn mưa bão xối xả, Lão Tam nghe thấy tiếng cào xé kỳ lạ phát ra sau gian chuồng cũ.
+Cầm ngọn đèn dầu rọi vào bóng tối, ông bàng hoàng nhận ra đôi mắt đỏ quỷ dị của con quái thú đang nhìn mình trừng trừng!
+Con quái thú nhe hàm nanh sắc nhọn gầm lên một tiếng rùng rợn, xé toạc màn mưa đêm giông bão!
+Lão Tam hốt hoảng vứt cả chiếc đèn dầu, cuống cuồng tháo chạy trong nỗi kinh hoàng tột độ!`
 
 interface VoiceOption {
   id: string
@@ -42,7 +43,7 @@ const DEFAULT_VOICE_GROUPS: VoiceGroup[] = [
     label: '⚡ Edge-TTS (Cloud Sẵn Sàng)',
     engine: 'edge',
     voices: [
-      { id: 'vi-VN-NamMinhNeural', name: '🎙️ Nam Minh (Trầm ấm Noir)', engine: 'edge', status: 'ready' },
+      { id: 'vi-VN-NamMinhNeural', name: '🎙️ Nam Minh (Trầm ấm Noir / Dân gian)', engine: 'edge', status: 'ready' },
       { id: 'vi-VN-HoaiMyNeural', name: '🎙️ Hoài My (Cảm xúc Drama)', engine: 'edge', status: 'ready' },
     ],
   },
@@ -50,15 +51,24 @@ const DEFAULT_VOICE_GROUPS: VoiceGroup[] = [
     label: '🎭 GPT-SoVITS (Voice Clone Cục Bộ)',
     engine: 'gpt_sovits',
     voices: [
-      { id: 'gpt:thanh_tra_minh', name: '🎭 Thanh Tra Minh (Mẫu)', engine: 'gpt_sovits', status: 'offline' },
-      { id: 'gpt:sat_nhan_giau_mat', name: '🎭 Kẻ Giấu Mặt (Mẫu)', engine: 'gpt_sovits', status: 'offline' },
+      { id: 'gpt:lao_tam', name: '🎭 Lão Tam (Mẫu)', engine: 'gpt_sovits', status: 'offline' },
+      { id: 'gpt:nguoi_ke_chuyen', name: '🎭 Người Kể Chuyện (Mẫu)', engine: 'gpt_sovits', status: 'offline' },
     ],
   },
 ]
 
 export default function StorytimePage() {
-  const [storyText, setStoryText] = useState(SAMPLE_DETECTIVE_STORY)
-  const [storyTitle, setStoryTitle] = useState('Vụ Án Mới')
+  const [searchParams] = useSearchParams()
+  const urlProjectId = searchParams.get('project_id')
+  const urlVideoId = searchParams.get('video_id')
+
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(urlProjectId)
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(urlVideoId)
+  const [finalVideoUrl, setFinalVideoUrl] = useState<string | null>(null)
+  const [isConcatenating, setIsConcatenating] = useState(false)
+
+  const [storyText, setStoryText] = useState(SAMPLE_FOLKLORE_STORY)
+  const [storyTitle, setStoryTitle] = useState('Bóng Đen Gian Chuồng Cũ')
   const [voice, setVoice] = useState('vi-VN-NamMinhNeural')
   const [voiceGroups, setVoiceGroups] = useState<VoiceGroup[]>(DEFAULT_VOICE_GROUPS)
   const [scenes, setScenes] = useState<StorytimeScene[]>([])
@@ -71,21 +81,65 @@ export default function StorytimePage() {
   const [statusMsg, setStatusMsg] = useState<string | null>(null)
   const [regeneratingIdx, setRegeneratingIdx] = useState<number | null>(null)
 
-  // Load sample package and available voices on mount
+  // Load project scenes or fallback to sample package on mount
   useEffect(() => {
-    fetchAPI<{ ok: boolean; package: { scenes: StorytimeScene[]; characters?: StoryCharacter[]; locations?: StoryLocation[] } }>('/api/storytime/sample-package')
-      .then(res => {
-        if (res.ok && res.package?.scenes?.length) {
-          setScenes(res.package.scenes)
-          if (res.package.characters?.length) {
-            setCharacters(res.package.characters)
+    async function loadInitialData() {
+      let vid = urlVideoId
+      let pid = urlProjectId
+
+      // Auto-detect active project if none passed in query
+      if (!vid) {
+        try {
+          const act = await fetchAPI<{ project_id?: string; video_id?: string; project_name?: string }>('/api/active-project')
+          if (act?.video_id) {
+            vid = act.video_id
+            pid = act.project_id || null
+            setActiveVideoId(vid)
+            if (pid) setActiveProjectId(pid)
+            if (act.project_name) setStoryTitle(act.project_name)
           }
-          if (res.package.locations?.length) {
-            setLocations(res.package.locations)
+        } catch {}
+      }
+
+      if (vid) {
+        try {
+          const dbScenes = await fetchAPI<any[]>(`/api/scenes?video_id=${vid}`)
+          if (dbScenes && dbScenes.length > 0) {
+            const mapped: StorytimeScene[] = dbScenes.map((s, idx) => ({
+              id: idx,
+              display_order: s.display_order ?? idx,
+              speaker: s.character_names ? s.character_names.replace(/[\[\]"']/g, '').split(',')[0].trim() : 'narrator',
+              text: s.narrator_text || s.prompt || s.video_prompt || `Cảnh ${idx + 1}`,
+              camera: 'zoom_in',
+              expression: 'serious',
+              background_prompt: s.prompt || '',
+              voice: 'vi-VN-NamMinhNeural',
+              action_type: 'dialogue',
+              video_url: s.horizontal_video_url || s.vertical_video_url,
+              duration_seconds: s.duration || 8.0,
+              duration_frames: Math.round((s.duration || 8.0) * 30),
+            }))
+            setScenes(mapped)
+            setFinalVideoUrl(`/api/storytime/preview-video/${vid}_final.mp4`)
+            setStatusMsg(`Đã tải ${mapped.length} phân cảnh từ dự án. Bấm "Ghép Video Hoàn Chỉnh" để xem phim!`)
           }
+        } catch (e) {
+          console.warn('Failed to load project scenes:', e)
         }
-      })
-      .catch(() => {})
+      } else {
+        fetchAPI<{ ok: boolean; package: { scenes: StorytimeScene[]; characters?: StoryCharacter[]; locations?: StoryLocation[] } }>('/api/storytime/sample-package')
+          .then(res => {
+            if (res.ok && res.package?.scenes?.length) {
+              setScenes(res.package.scenes)
+              if (res.package.characters?.length) setCharacters(res.package.characters)
+              if (res.package.locations?.length) setLocations(res.package.locations)
+            }
+          })
+          .catch(() => {})
+      }
+    }
+
+    loadInitialData()
 
     fetchAPI<{ ok: boolean; groups?: VoiceGroup[] }>('/api/storytime/voices')
       .then(res => {
@@ -94,7 +148,7 @@ export default function StorytimePage() {
         }
       })
       .catch(() => {})
-  }, [])
+  }, [urlProjectId, urlVideoId])
 
   // 1. AI Script Breakdown
   const handleBreakdown = async () => {
@@ -217,6 +271,33 @@ export default function StorytimePage() {
     })
   }
 
+  // 4. Concatenate All Scenes into One Final Video using FFmpeg
+  const handleConcatVideo = async () => {
+    if (!activeVideoId) {
+      setStatusMsg('Chưa xác định được Video ID của dự án để ghép!')
+      return
+    }
+    setIsConcatenating(true)
+    setStatusMsg('Đang tải các phân cảnh từ Google Flow và dùng FFmpeg ghép thành 1 video hoàn chỉnh...')
+    try {
+      const res = await postAPI<{
+        ok: boolean
+        video_url: string
+        filename: string
+        scenes_count: number
+        file_size: number
+      }>(`/api/videos/${activeVideoId}/concat`, {})
+      if (res.ok && res.video_url) {
+        setFinalVideoUrl(res.video_url)
+        setStatusMsg(`🎉 Đã ghép thành công ${res.scenes_count} phân cảnh thành 1 video hoàn chỉnh (${(res.file_size / (1024 * 1024)).toFixed(2)} MB)!`)
+      }
+    } catch (e) {
+      setStatusMsg(`Lỗi ghép video: ${e instanceof Error ? e.message : String(e)}`)
+    } finally {
+      setIsConcatenating(false)
+    }
+  }
+
   // Location management helpers
   const addLocation = () => {
     const idx = locations.length
@@ -310,16 +391,16 @@ export default function StorytimePage() {
               rows={4}
               value={storyText}
               onChange={e => setStoryText(e.target.value)}
-              placeholder="Dán nội dung truyện trinh thám hoặc câu chuyện cần làm video vào đây..."
+              placeholder="Dán nội dung truyện dân gian, kinh dị hoặc kịch bản phân cảnh vào đây..."
               className="w-full bg-slate-950 text-slate-200 text-sm p-3.5 rounded-xl border border-slate-800 focus:border-amber-500/50 outline-none resize-none leading-relaxed"
             />
 
             <div className="flex items-center justify-between mt-3 pt-2">
               <button
-                onClick={() => setStoryText(SAMPLE_DETECTIVE_STORY)}
+                onClick={() => setStoryText(SAMPLE_FOLKLORE_STORY)}
                 className="text-xs text-slate-400 hover:text-slate-200 underline"
               >
-                Tải kịch bản mẫu trinh thám
+                Tải kịch bản mẫu 2D dân gian
               </button>
 
               <button
@@ -697,13 +778,17 @@ export default function StorytimePage() {
               Xem Trước Video Trực Tiếp
             </h2>
 
-            {activePackageId && (
-              <span className="text-[11px] font-mono text-slate-500">ID: {activePackageId}</span>
+            {(activePackageId || activeProjectId) && (
+              <span className="text-[11px] font-mono text-slate-500">ID: {activePackageId || activeProjectId}</span>
             )}
           </div>
 
-          {/* Interactive Player with FFT Lip-Sync */}
-          <StorytimePlayer scenes={scenes} textConfig={textConfig} characters={characters} />
+          {/* Real Google Flow Video Player */}
+          <RealVideoPlayer
+            initialVideoUrl={finalVideoUrl || (activeVideoId ? `/api/storytime/preview-video/${activeVideoId}_final.mp4` : '/api/storytime/preview-video/sample.mp4')}
+            initialUuid={scenes[0]?.video_url ? undefined : '8a3fdd42-25a5-40d9-9827-6cd3afaadb24'}
+            title={`Khung chiếu phim: ${storyTitle || 'Bóng Đen Gian Chuồng Cũ'}`}
+          />
 
           {/* Post-Production Step: Subtitle & Text Overlay Customizer */}
           <TextOverlayCustomizer
@@ -712,34 +797,74 @@ export default function StorytimePage() {
             videoReady={scenes.some(s => !!s.audio_url) || scenes.length > 0}
           />
 
-          {/* Export & Actions Card */}
-          <div className="bg-slate-900/80 rounded-2xl p-4 border border-slate-800 flex flex-col gap-3">
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span>Độ phân giải: 1920x1080 (16:9)</span>
-              <span>Khung hình: 30 FPS</span>
+          {/* Ghép & Xuất Bản Video Hoàn Chỉnh Card */}
+          <div className="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 flex flex-col gap-4 shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Film className="w-4 h-4 text-emerald-400" />
+                  Ghép & Xuất Bản Video Hoàn Chỉnh
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Ghép nối tất cả {scenes.length} phân cảnh Veo 3 thành 1 video liền mạch bằng FFmpeg
+                </p>
+              </div>
+              <span className="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-1 rounded">1080p · 16:9</span>
             </div>
 
-            <button
-              onClick={() => {
-                const exportPayload = {
-                  package_id: activePackageId || 'custom_storytime',
-                  exported_at: new Date().toISOString(),
-                  text_overlay_config: textConfig,
-                  locations: locations,
-                  scenes: scenes,
-                }
-                const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' })
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = 'storytime_package.json'
-                a.click()
-              }}
-              className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all"
-            >
-              <Download className="w-4 h-4 text-amber-400" />
-              <span>Tải JSON Cấu Trúc Khung Hình & Cấu Hình Text</span>
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleConcatVideo}
+                disabled={isConcatenating || !scenes.length}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-50"
+              >
+                {isConcatenating ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Film className="w-4 h-4" />
+                )}
+                <span>{isConcatenating ? 'Đang Ghép Video Bằng FFmpeg...' : '🎬 Ghép Thành 1 Video Hoàn Chỉnh'}</span>
+              </button>
+
+              {finalVideoUrl && (
+                <a
+                  href={finalVideoUrl}
+                  download={`${storyTitle || 'video'}_final.mp4`}
+                  className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs flex items-center justify-center gap-2 border border-slate-700 shadow-md active:scale-95 transition-all"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Tải Video MP4 Về Máy</span>
+                </a>
+              )}
+            </div>
+
+            <div className="border-t border-slate-800/80 pt-3 flex items-center justify-between">
+              <button
+                onClick={() => {
+                  const exportPayload = {
+                    package_id: activePackageId || 'custom_storytime',
+                    exported_at: new Date().toISOString(),
+                    text_overlay_config: textConfig,
+                    locations: locations,
+                    scenes: scenes,
+                  }
+                  const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = 'storytime_package.json'
+                  a.click()
+                }}
+                className="text-xs text-slate-400 hover:text-slate-200 underline flex items-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Xuất file JSON cấu trúc kịch bản</span>
+              </button>
+
+              {activeVideoId && (
+                <span className="text-[10px] font-mono text-slate-500">Video ID: {activeVideoId.slice(0, 8)}...</span>
+              )}
+            </div>
           </div>
         </div>
       </div>

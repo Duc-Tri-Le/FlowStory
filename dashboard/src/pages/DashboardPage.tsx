@@ -13,7 +13,8 @@ import {
   Sparkles,
   RefreshCw,
 } from 'lucide-react'
-import StorytimePlayer, { type StorytimeScene } from '../components/storytime/StorytimePlayer'
+import RealVideoPlayer from '../components/storytime/RealVideoPlayer'
+import { type StorytimeScene } from '../components/storytime/StorytimePlayer'
 import TextOverlayCustomizer, { type TextOverlayConfig, DEFAULT_TEXT_CONFIG } from '../components/storytime/TextOverlayCustomizer'
 import { fetchAPI } from '../api/client'
 import CreateProjectModal from '../components/projects/CreateProjectModal'
@@ -51,8 +52,8 @@ export default function DashboardPage() {
       setPackages([
         {
           package_id: 'sample',
-          title: 'Bí Ẩn Vụ Án Căn Phòng Kín',
-          genre: 'trinh_tham',
+          title: 'Bóng Đen Gian Chuồng Cũ (Hoạt Hình 2D Dân Gian)',
+          genre: 'folklore_2d',
           scenes_count: 2,
           total_duration: 12.0,
           status: 'COMPLETED',
@@ -121,7 +122,7 @@ export default function DashboardPage() {
             </span>
           </div>
           <p className="text-sm text-slate-400 mt-1">
-            Trung tâm sản xuất hàng loạt video hoạt hình trinh thám tối giản (Faceless Storytime Noir).
+            Trung tâm sản xuất video hoạt hình 2D OverSimplified & Kinh Dị Dân Gian tự động qua Google Flow (Imagen 3 & Veo 3).
           </p>
         </div>
 
@@ -328,8 +329,11 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          {/* Interactive Player */}
-          <StorytimePlayer scenes={currentScenes} textConfig={textConfig} />
+          {/* Real Google Flow Video Player */}
+          <RealVideoPlayer
+            initialUuid="8a3fdd42-25a5-40d9-9827-6cd3afaadb24"
+            title={`Xem trước: ${packages.find(p => p.package_id === selectedPackageId)?.title || 'Bóng Đen Gian Chuồng Cũ'}`}
+          />
 
           {/* Post-Production Step: Subtitle & Text Overlay Customizer */}
           <TextOverlayCustomizer

@@ -26,6 +26,7 @@ export interface StorytimeScene {
   camera?: string // "close" | "zoom_in" | "pan_right" | "pan_left" | "static"
   expression?: string // "serious" | "shocked" | "thinking" | "talking" | "fear"
   audio_url?: string
+  video_url?: string
   duration_seconds: number
   duration_frames: number
   subtitles?: SubtitleWord[]
@@ -181,33 +182,13 @@ function CharacterActor({
   } else if (isMoving && isPlaying) {
     const swing = Math.sin(currentTime * freq) * (isFast ? 30 : 20)
     rightArmPath = `M 220,215 Q ${245 + swing * 0.5},${285} ${230 + swing},${345}`
-  } else if (type === 'detective') {
-    // Detective holds cigarette up near mouth
-    rightArmPath = `M 220,215 Q 260,255 208,165`
-  } else if (type === 'suspect') {
-    // Suspect rubbing hands nervously
-    rightArmPath = `M 220,215 Q 230,290 185,300`
   } else {
     rightArmPath = `M 220,215 Q 250,290 220,340`
   }
 
-  // Costume Palette based on Character Color or Type
-  const coatFill =
-    color ||
-    (type === 'detective'
-      ? '#1e242c' // Charcoal noir coat
-      : type === 'suspect'
-      ? '#1e293b' // Deep navy butler suit
-      : type === 'witness'
-      ? '#4c1d95' // Deep purple witness dress
-      : '#334155')
+  // Costume Palette based on Character Color or Folklore Tone
+  const coatFill = color || '#78350f'
 
-  const collarFill =
-    type === 'suspect'
-      ? '#f8fafc' // White shirt under vest
-      : type === 'witness'
-      ? '#a855f7'
-      : '#334155'
 
   return (
     <div
@@ -280,33 +261,8 @@ function CharacterActor({
             strokeLinejoin="round"
           />
 
-          {/* Inner Shirt / Vest Details */}
-          {type === 'suspect' ? (
-            <>
-              {/* White V-Shirt */}
-              <polygon points="150,210 170,260 190,210" fill={collarFill} stroke="#090a0f" strokeWidth="4" />
-              {/* Red Bowtie */}
-              <polygon points="160,214 170,222 160,230" fill="#dc2626" stroke="#090a0f" strokeWidth="2.5" />
-              <polygon points="180,214 170,222 180,230" fill="#dc2626" stroke="#090a0f" strokeWidth="2.5" />
-              <circle cx="170" cy="222" r="3" fill="#b91c1c" />
-              {/* Vest Buttons */}
-              <circle cx="170" cy="285" r="3" fill="#e2e8f0" />
-              <circle cx="170" cy="325" r="3" fill="#e2e8f0" />
-              <circle cx="170" cy="365" r="3" fill="#e2e8f0" />
-            </>
-          ) : type === 'witness' ? (
-            <>
-              {/* Witness Scarf / Blouse */}
-              <path d="M 140,210 Q 170,270 200,210" fill="none" stroke="#e879f9" strokeWidth="6" />
-              <line x1="170" y1="260" x2="170" y2="410" stroke="#090a0f" strokeWidth="4" />
-            </>
-          ) : (
-            <>
-              {/* Detective Trench Coat Lapels */}
-              <line x1="170" y1="210" x2="170" y2="410" stroke="#090a0f" strokeWidth="5" />
-              <path d="M 130,210 L 170,270 L 210,210" fill="none" stroke="#090a0f" strokeWidth="6" />
-            </>
-          )}
+          {/* Clean OverSimplified Minimalist Torso Line */}
+          <line x1="170" y1="210" x2="170" y2="280" stroke="#090a0f" strokeWidth="4" strokeLinecap="round" opacity="0.3" />
 
           {/* ── Articulated Left Arm ── */}
           <path d={leftArmPath} fill="none" stroke="#090a0f" strokeWidth="7" strokeLinecap="round" />
@@ -327,13 +283,7 @@ function CharacterActor({
             </>
           )}
 
-          {/* Detective Eye Shadow / Noir Bags */}
-          {type === 'detective' && (
-            <>
-              <path d="M 135,115 A 12,8 0 0,0 155,115" fill="none" stroke="#94a3b8" strokeWidth="3" opacity="0.6" />
-              <path d="M 185,115 A 12,8 0 0,0 205,115" fill="none" stroke="#94a3b8" strokeWidth="3" opacity="0.6" />
-            </>
-          )}
+
 
           {/* Suspect Sweat Drop when Nervous */}
           {type === 'suspect' && (expression === 'shocked' || expression === 'fear' || action === 'shiver') && (
@@ -402,24 +352,7 @@ function CharacterActor({
             <path d="M 154,142 Q 170,140 186,142" fill="none" stroke="#090a0f" strokeWidth="5" strokeLinecap="round" />
           )}
 
-          {/* Detective Cigarette & Live Smoke (Only for classic detective) */}
-          {type === 'detective' && !color && (
-            <>
-              <line x1="184" y1="145" x2="216" y2="152" stroke="#e2e8f0" strokeWidth="4.5" strokeLinecap="round" />
-              <line x1="214" y1="151.5" x2="220" y2="153" stroke="#ea580c" strokeWidth="4.5" strokeLinecap="round" />
-              <path
-                d={`M 220,152 Q ${225 + Math.sin(currentTime * 4) * 8},130 ${
-                  230 + Math.cos(currentTime * 3) * 10
-                },105 T ${228 + Math.sin(currentTime * 5) * 12},75`}
-                fill="none"
-                stroke="#94a3b8"
-                strokeWidth="2.5"
-                opacity={0.5 + Math.sin(currentTime * 3) * 0.25}
-                strokeDasharray="4 3"
-                strokeLinecap="round"
-              />
-            </>
-          )}
+
         </svg>
       </div>
     </div>
@@ -632,9 +565,8 @@ export default function StorytimePlayer({
     }
     // Fallback default cast if no characters passed
     return [
-      { id: 'char_1', name: 'Nhân vật 1', color: '#1e242c', type: 'detective' as CharacterType },
-      { id: 'char_2', name: 'Nhân vật 2', color: '#1e293b', type: 'suspect' as CharacterType },
-      { id: 'char_3', name: 'Nhân vật 3', color: '#4c1d95', type: 'witness' as CharacterType },
+      { id: 'lao_tam', name: 'Lão Tam', color: '#78350f', type: 'general' as CharacterType },
+      { id: 'quai_thu', name: 'Quái Thú Đêm', color: '#991b1b', type: 'general' as CharacterType },
     ]
   }, [characters])
 

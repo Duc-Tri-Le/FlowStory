@@ -13,7 +13,8 @@ import StageNode from './StageNode'
 import SceneCard from './SceneCard'
 import SceneDetailSheet from './SceneDetailSheet'
 import GenerateVideoDialog from './GenerateVideoDialog'
-import { CheckCircle2, ArrowRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { CheckCircle2, ArrowRight, Clapperboard, Film, RefreshCw } from 'lucide-react'
 
 type StageKey = 'refs' | 'image' | 'video' | 'upscale'
 
@@ -37,6 +38,7 @@ const RETRY_TYPE: Record<SceneStage, string> = {
 
 export default function PipelineView({ projectId, videoId }: PipelineViewProps) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [project, setProject] = useState<Project | null>(null)
   const [video, setVideo] = useState<Video | null>(null)
   const [characters, setCharacters] = useState<Character[]>([])
@@ -55,6 +57,23 @@ export default function PipelineView({ projectId, videoId }: PipelineViewProps) 
   const [generatingImages, setGeneratingImages] = useState(false)
   const [generatingVideos, setGeneratingVideos] = useState(false)
   const [videoDialogOpen, setVideoDialogOpen] = useState(false)
+  const [isConcatenating, setIsConcatenating] = useState(false)
+
+  async function handleQuickConcat() {
+    if (!videoId) return
+    setIsConcatenating(true)
+    try {
+      const res = await postAPI<{ ok: boolean; video_url: string }>(`/api/videos/${videoId}/concat`, {})
+      if (res.ok) {
+        navigate(`/storytime?project_id=${projectId}&video_id=${videoId}`)
+      }
+    } catch (e) {
+      console.error('Concat failed:', e)
+      alert('Ghép video thất bại: ' + (e instanceof Error ? e.message : String(e)))
+    } finally {
+      setIsConcatenating(false)
+    }
+  }
 
   const { lastEvent } = useWebSocketContext()
 
@@ -420,7 +439,9 @@ export default function PipelineView({ projectId, videoId }: PipelineViewProps) 
                   ? 'Tất cả ảnh bối cảnh đã xong! Hãy duyệt kỹ từng khung hình bên dưới. Khi bạn đồng ý, bấm nút bên phải để bắt đầu tạo video.'
                   : 'Kiểm tra mô tả prompt ảnh cảnh bên dưới. Bấm nút bên phải để tiến hành tạo ảnh cho các phân cảnh.')}
               {activeStage === 'video' &&
-                'Chỉ tạo video sau khi bạn đã kiểm tra và đồng ý với ảnh bối cảnh ở bước trước.'}
+                (allVideosDone
+                  ? 'Tuyệt vời! Tất cả video phân cảnh đã hoàn thành. Hãy kiểm tra các video bên dưới hoặc bấm nút bên phải để sang Storytime ghép thành phim hoàn chỉnh.'
+                  : 'Chỉ tạo video sau khi bạn đã kiểm tra và đồng ý với ảnh bối cảnh ở bước trước.')}
               {activeStage === 'upscale' &&
                 'Nâng cấp độ phân giải các video đã hoàn thành lên 4K.'}
             </p>
@@ -487,15 +508,48 @@ export default function PipelineView({ projectId, videoId }: PipelineViewProps) 
           )}
 
           {activeStage === 'video' && (
-            <Button
-              size="sm"
-              disabled={generatingVideos || anyVideoProcessing}
-              onClick={() => setVideoDialogOpen(true)}
-              style={{ background: 'var(--accent)', color: '#fff' }}
-              className="text-xs h-8"
-            >
-              {generatingVideos || anyVideoProcessing ? 'Đang gửi...' : '▶ Tạo Video'}
-            </Button>
+            allVideosDone ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setVideoDialogOpen(true)}
+                  className="text-xs h-8"
+                >
+                  Tùy chọn tạo lại...
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleQuickConcat}
+                  disabled={isConcatenating}
+                  className="text-xs h-8 font-bold flex items-center gap-1.5 shadow-md border-0"
+                  style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#090a0f' }}
+                  title="Ghép nối tất cả các phân cảnh thành 1 video duy nhất"
+                >
+                  {isConcatenating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Film className="w-3.5 h-3.5" />}
+                  <span>{isConcatenating ? 'Đang ghép video...' : '🎬 Ghép 3 Cảnh Thành 1 Video'}</span>
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => navigate(`/storytime?project_id=${projectId}&video_id=${videoId}`)}
+                  className="text-xs h-8 font-semibold flex items-center gap-1.5 shadow-md"
+                  style={{ background: '#10b981', color: '#fff' }}
+                >
+                  <Clapperboard className="w-3.5 h-3.5" />
+                  <span>Storytime (Ghép phim & Lồng tiếng) →</span>
+                </Button>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                disabled={generatingVideos || anyVideoProcessing}
+                onClick={() => setVideoDialogOpen(true)}
+                style={{ background: 'var(--accent)', color: '#fff' }}
+                className="text-xs h-8"
+              >
+                {generatingVideos || anyVideoProcessing ? 'Đang gửi...' : '▶ Tạo Video'}
+              </Button>
+            )
           )}
         </div>
       </div>
@@ -584,14 +638,26 @@ export default function PipelineView({ projectId, videoId }: PipelineViewProps) 
                 </Button>
               )}
               {activeStage === 'video' && (
-                <Button
-                  size="sm"
-                  disabled={generatingVideos}
-                  onClick={() => setVideoDialogOpen(true)}
-                  style={{ background: 'var(--accent)', color: '#fff' }}
-                >
-                  {generatingVideos ? 'Đang gửi...' : '▶ Tạo Video'}
-                </Button>
+                allVideosDone ? (
+                  <Button
+                    size="sm"
+                    onClick={() => navigate('/storytime')}
+                    className="text-xs h-7 font-medium flex items-center gap-1.5"
+                    style={{ background: '#10b981', color: '#fff' }}
+                  >
+                    <Clapperboard className="w-3.5 h-3.5" />
+                    <span>Sang Storytime →</span>
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    disabled={generatingVideos}
+                    onClick={() => setVideoDialogOpen(true)}
+                    style={{ background: 'var(--accent)', color: '#fff' }}
+                  >
+                    {generatingVideos ? 'Đang gửi...' : '▶ Tạo Video'}
+                  </Button>
+                )
               )}
               <span className="text-[10px] tracking-wide uppercase" style={{ color: 'var(--muted)' }}>{t('pipeline.sort')}</span>
               <Button variant="outline" size="sm" onClick={() => setSortFailedFirst(v => !v)}>
