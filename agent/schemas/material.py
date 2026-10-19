@@ -9,6 +9,7 @@ class MaterialResponse(BaseModel):
     style_instruction: str
     negative_prompt: Optional[str] = None
     scene_prefix: Optional[str] = None
+    video_prefix: Optional[str] = None
     lighting: str = "Studio lighting, highly detailed"
     is_builtin: bool = True
 
@@ -19,4 +20,5 @@ class MaterialCreateRequest(BaseModel):
     style_instruction: str = Field(..., min_length=10, max_length=2000)
     negative_prompt: Optional[str] = Field(None, max_length=1000)
     scene_prefix: Optional[str] = Field(None, max_length=500)
+    video_prefix: Optional[str] = Field(None, max_length=500)
     lighting: str = Field("Studio lighting, highly detailed", max_length=200)

@@ -21,13 +21,21 @@ interface Props {
 
 const MATERIAL_OPTIONS = [
   { id: 'realistic', label: 'Photorealistic (Điện ảnh chân thực)' },
+  { id: 'cinematic_drama', label: 'Cinematic Drama (Phim truyền hình 35mm)' },
+  { id: 'oversimplified_2d', label: 'OverSimplified 2D (Hoạt hình 2D Storytime)' },
   { id: '3d_pixar', label: '3D Pixar (Hoạt hình 3D Pixar)' },
   { id: 'anime', label: 'Anime (Anime Nhật Bản)' },
-  { id: 'anime_comedy', label: 'Anime Comedy (Hài hước)' },
+  { id: 'anime_comedy', label: 'Anime Comedy (Hoạt hình hài hước)' },
   { id: 'ghibli', label: 'Studio Ghibli (Phong cách Ghibli)' },
-  { id: 'cyberpunk', label: 'Cyberpunk (Tương lai viễn tưởng)' },
-  { id: 'oil_painting', label: 'Oil Painting (Sơn dầu)' },
   { id: 'comic_book', label: 'Comic Book (Truyện tranh)' },
+  { id: 'watercolor', label: 'Watercolor (Tranh màu nước)' },
+  { id: 'oil_painting', label: 'Oil Painting (Sơn dầu cổ điển)' },
+  { id: 'claymation', label: 'Claymation (Đất sét hoạt hình)' },
+  { id: 'stop_motion', label: 'Stop Motion (Thủ công nỉ & gỗ)' },
+  { id: 'minecraft', label: 'Minecraft (Voxel khối vuông)' },
+  { id: 'lego', label: 'LEGO (Xếp hình Lego)' },
+  { id: 'cyberpunk', label: 'Cyberpunk (Tương lai viễn tưởng)' },
+  { id: 'retro_vhs', label: 'Retro VHS (Băng từ thập niên 80)' },
 ]
 
 const VOICE_OPTIONS = [
@@ -58,6 +66,7 @@ export default function CreateProjectModal({ open, onOpenChange, onCreated }: Pr
   const [name, setName] = useState('')
   const [flowUuid, setFlowUuid] = useState('')
   const [material, setMaterial] = useState('realistic')
+  const [orientation, setOrientation] = useState<'HORIZONTAL' | 'VERTICAL'>('HORIZONTAL')
   const [voice, setVoice] = useState('vi-VN-NamMinhNeural')
   const [prompt, setPrompt] = useState(DEFAULT_BATCH_INPUT)
   const [showAdvanced, setShowAdvanced] = useState(false)
@@ -68,6 +77,7 @@ export default function CreateProjectModal({ open, onOpenChange, onCreated }: Pr
     setName('')
     setFlowUuid('')
     setMaterial('realistic')
+    setOrientation('HORIZONTAL')
     setVoice('vi-VN-NamMinhNeural')
     setPrompt(DEFAULT_BATCH_INPUT)
     setShowAdvanced(false)
@@ -104,6 +114,7 @@ export default function CreateProjectModal({ open, onOpenChange, onCreated }: Pr
           story: prompt.trim(),
           flow_project_id: flowUuid.trim() || undefined,
           material,
+          orientation,
         }),
       })
 
@@ -152,11 +163,11 @@ export default function CreateProjectModal({ open, onOpenChange, onCreated }: Pr
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3.5 pt-1">
-          {/* Controls Row: Material & Voice */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* Controls Row: Material, Orientation & Voice */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-medium tracking-wide uppercase" style={{ color: 'var(--text)' }}>
-                Phong Cách Hình Ảnh (Material)
+                Phong Cách (Material)
               </label>
               <select
                 value={material}
@@ -173,7 +184,23 @@ export default function CreateProjectModal({ open, onOpenChange, onCreated }: Pr
 
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-medium tracking-wide uppercase" style={{ color: 'var(--text)' }}>
-                Giọng Đọc Mặc Định (TTS)
+                Tỷ Lệ Khung Hình
+              </label>
+              <select
+                value={orientation}
+                onChange={e => setOrientation(e.target.value as 'HORIZONTAL' | 'VERTICAL')}
+                disabled={loading}
+                className="w-full px-3 py-2 rounded-lg text-xs font-medium outline-none"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
+              >
+                <option value="HORIZONTAL">🖥️ 16:9 Ngang (Chuẩn Phim)</option>
+                <option value="VERTICAL">📱 9:16 Dọc (Shorts/TikTok)</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-medium tracking-wide uppercase" style={{ color: 'var(--text)' }}>
+                Giọng Đọc (TTS)
               </label>
               <select
                 value={voice}

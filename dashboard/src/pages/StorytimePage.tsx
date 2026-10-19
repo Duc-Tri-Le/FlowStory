@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Sparkles, Wand2, RefreshCw, Download, FileText, Mic, Film, CheckCircle2, MapPin, Plus, Trash2 } from 'lucide-react'
-import StorytimePlayer, { type StorytimeScene } from '../components/storytime/StorytimePlayer'
+import { Sparkles, Wand2, RefreshCw, Download, FileText, Mic, Film, CheckCircle2, MapPin, Plus, Trash2, Users } from 'lucide-react'
+import StorytimePlayer, { type StorytimeScene, type StoryCharacter } from '../components/storytime/StorytimePlayer'
 import TextOverlayCustomizer, { type TextOverlayConfig, DEFAULT_TEXT_CONFIG } from '../components/storytime/TextOverlayCustomizer'
 import { fetchAPI, postAPI } from '../api/client'
 
 const SAMPLE_DETECTIVE_STORY = `Đêm hôm đó, một vụ án mạng kỳ lạ đã xảy ra ngay tại căn phòng số bảy.
-Cửa phòng bị khóa trái từ bên trong, không có bất kỳ dấu vết cạy phá nào.
-Nạn nhân là một triệu phú già, nằm gục bên bàn làm việc với chiếc đồng hồ vỡ nát.
-Kỳ lạ thay, kim đồng hồ đã dừng lại chính xác ở thời điểm mười một giờ mười lăm phút.
-Mọi người trong ngôi nhà đều có chứng cứ ngoại phạm, ngoại trừ người quản gia vừa biến mất bí ẩn.`
+Thanh tra Minh bước lại gần và chất vấn: "Quản gia Lâm, lúc mười một giờ đêm đó ông ở đâu?"
+Quản gia Lâm sợ hãi xua tay: "Oan cho tôi quá, lúc đó tôi đang ở dưới tầng hầm kiểm tra kho rượu!"
+Bất ngờ, quản gia vùng chạy trốn thục mạng ra phía hành lang tối, thám tử Minh liền lao theo truy bắt!
+Nhân chứng Mai bàng hoàng chỉ tay: "Hắn ta chính là kẻ vừa giấu chiếc đồng hồ vỡ nát của nạn nhân!"`
 
 interface VoiceOption {
   id: string
@@ -58,9 +58,11 @@ const DEFAULT_VOICE_GROUPS: VoiceGroup[] = [
 
 export default function StorytimePage() {
   const [storyText, setStoryText] = useState(SAMPLE_DETECTIVE_STORY)
+  const [storyTitle, setStoryTitle] = useState('Vụ Án Mới')
   const [voice, setVoice] = useState('vi-VN-NamMinhNeural')
   const [voiceGroups, setVoiceGroups] = useState<VoiceGroup[]>(DEFAULT_VOICE_GROUPS)
   const [scenes, setScenes] = useState<StorytimeScene[]>([])
+  const [characters, setCharacters] = useState<StoryCharacter[]>([])
   const [locations, setLocations] = useState<StoryLocation[]>([])
   const [textConfig, setTextConfig] = useState<TextOverlayConfig>(DEFAULT_TEXT_CONFIG)
   const [isBreakingDown, setIsBreakingDown] = useState(false)
@@ -71,10 +73,16 @@ export default function StorytimePage() {
 
   // Load sample package and available voices on mount
   useEffect(() => {
-    fetchAPI<{ ok: boolean; package: { scenes: StorytimeScene[] } }>('/api/storytime/sample-package')
+    fetchAPI<{ ok: boolean; package: { scenes: StorytimeScene[]; characters?: StoryCharacter[]; locations?: StoryLocation[] } }>('/api/storytime/sample-package')
       .then(res => {
         if (res.ok && res.package?.scenes?.length) {
           setScenes(res.package.scenes)
+          if (res.package.characters?.length) {
+            setCharacters(res.package.characters)
+          }
+          if (res.package.locations?.length) {
+            setLocations(res.package.locations)
+          }
         }
       })
       .catch(() => {})
@@ -94,17 +102,32 @@ export default function StorytimePage() {
     setIsBreakingDown(true)
     setStatusMsg('Đang bóc tách kịch bản thành từng cảnh 10-25 từ...')
     try {
-      const res = await postAPI<{ ok: boolean; spec: { scenes: StorytimeScene[]; locations?: StoryLocation[] } }>('/api/storytime/breakdown', {
+      const res = await postAPI<{
+        ok: boolean
+        spec: {
+          title?: string
+          scenes: StorytimeScene[]
+          locations?: StoryLocation[]
+          characters?: StoryCharacter[]
+        }
+      }>('/api/storytime/breakdown', {
         story_text: storyText,
-        genre: 'trinh_tham',
+        genre: 'general',
       })
       if (res.ok && res.spec?.scenes) {
+        if (res.spec.title) {
+          setStoryTitle(res.spec.title)
+        }
         setScenes(res.spec.scenes)
+        if (res.spec.characters?.length) {
+          setCharacters(res.spec.characters)
+        }
         if (res.spec.locations?.length) {
           setLocations(res.spec.locations)
         }
+        const charCount = res.spec.characters?.length || 0
         const locCount = res.spec.locations?.length || 0
-        setStatusMsg(`Đã chia kịch bản thành ${res.spec.scenes.length} cảnh, ${locCount} bối cảnh. Hãy bấm "Tạo Giọng & Phụ Đề"!`)
+        setStatusMsg(`Đã bóc tách thành ${res.spec.scenes.length} cảnh, ${charCount} nhân vật, ${locCount} bối cảnh. Hãy bấm "Tạo Giọng & Phụ Đề"!`)
       }
     } catch (e) {
       setStatusMsg(`Lỗi bóc tách: ${e instanceof Error ? e.message : String(e)}`)
@@ -119,32 +142,38 @@ export default function StorytimePage() {
     setIsGeneratingTTS(true)
     setStatusMsg('Đang sinh giọng đọc Edge-TTS cho từng phân cảnh và đồng bộ kịch bản...')
     try {
-      const res = await postAPI<{ ok: boolean; package: { package_id: string; scenes: StorytimeScene[]; locations?: StoryLocation[] } }>(
+      const res = await postAPI<{ ok: boolean; package: { package_id: string; project_id?: string; scenes: StorytimeScene[]; characters?: StoryCharacter[]; locations?: StoryLocation[] } }>(
         '/api/storytime/build-package',
         {
-          title: 'Vụ Án Mới',
-          genre: 'trinh_tham',
+          title: storyTitle || 'Vụ Án Mới',
+          genre: 'general',
           voice: voice,
+          story_text: storyText,
+          characters: characters.length > 0 ? characters : undefined,
           locations: locations.length > 0 ? locations : undefined,
           scenes: scenes.map((s, idx) => ({
             display_order: idx,
-            speaker: s.speaker || 'thanh_tra',
+            speaker: s.speaker || 'char_1',
             text: s.text,
             camera: s.camera || 'zoom_in',
             expression: s.expression || 'serious',
             background_prompt: s.background_prompt,
             voice: s.voice || voice,
             location_id: s.location_id,
+            action_type: s.action_type || 'dialogue',
           })),
         }
       )
       if (res.ok && res.package) {
         setScenes(res.package.scenes)
+        if (res.package.characters?.length) {
+          setCharacters(res.package.characters)
+        }
         if (res.package.locations?.length) {
           setLocations(res.package.locations)
         }
         setActivePackageId(res.package.package_id)
-        setStatusMsg('Đã tạo xong Giọng đọc theo từng phân cảnh! Bấm "Phát Thử" bên phải để xem.')
+        setStatusMsg('Đã tạo xong Giọng đọc và lưu thành công vào Dự án! Bấm "Phát Thử" bên phải để xem.')
       }
     } catch (e) {
       setStatusMsg(`Lỗi xử lý: ${e instanceof Error ? e.message : String(e)}`)
@@ -211,6 +240,11 @@ export default function StorytimePage() {
     setScenes(prev => prev.map(s => s.location_id === locId ? { ...s, location_id: undefined } : s))
   }
 
+  // Character management helper
+  const updateCharacter = (charId: string, updates: Partial<StoryCharacter>) => {
+    setCharacters(prev => prev.map(c => c.id === charId ? { ...c, ...updates } : c))
+  }
+
   // Count scenes per location for badge display
   const scenesPerLocation = (locId: string) => scenes.filter(s => s.location_id === locId).length
 
@@ -222,14 +256,14 @@ export default function StorytimePage() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
               <Film className="w-6 h-6 text-amber-500" />
-              Noir Storytime Studio
+              Storytime Animation Studio
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              Limited 2D Animatic
+              Multi-Character 2D Engine
             </span>
           </div>
           <p className="text-sm text-slate-400 mt-1">
-            Sản xuất video hoạt hình trinh thám/drama tối giản: Giọng đọc Edge-TTS, Nhép miệng FFT và Phụ đề Whisper từng từ.
+            Sản xuất video hoạt hình đa nhân vật tự động: Hỗ trợ mọi kịch bản, hành động di chuyển, đối thoại & rượt đuổi với FFT Lip-Sync.
           </p>
         </div>
 
@@ -299,7 +333,57 @@ export default function StorytimePage() {
             </div>
           </div>
 
-          {/* 2. Location Manager */}
+          {/* 2. Character Manager */}
+          {characters.length > 0 && (
+            <div className="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 shadow-xl">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                    <Users className="w-4 h-4 text-blue-400" />
+                    Nhân Vật Hoạt Hình ({characters.length})
+                  </h3>
+                  <p className="text-xs text-slate-500">Màu trang phục & nhân vật bóc tách từ kịch bản</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {characters.map(char => (
+                  <div
+                    key={char.id}
+                    className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between gap-3"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className="w-3.5 h-3.5 rounded-full shrink-0 ring-2 ring-slate-800"
+                        style={{ backgroundColor: char.color }}
+                      />
+                      <input
+                        type="text"
+                        value={char.name}
+                        onChange={e => updateCharacter(char.id, { name: e.target.value })}
+                        className="bg-transparent text-slate-200 text-xs font-semibold outline-none border-b border-transparent hover:border-slate-700 focus:border-blue-500/50 min-w-0"
+                      />
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+                        {char.gender === 'female' ? 'Nữ' : char.gender === 'male' ? 'Nam' : 'Khác'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <input
+                        type="color"
+                        value={char.color}
+                        onChange={e => updateCharacter(char.id, { color: e.target.value })}
+                        className="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0"
+                        title="Đổi màu trang phục 2D"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 3. Location Manager */}
           <div className="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 shadow-xl">
             <div className="flex items-center justify-between mb-3">
               <div>
@@ -419,8 +503,22 @@ export default function StorytimePage() {
                           <span className="w-5 h-5 rounded-md bg-slate-800 text-slate-300 font-mono text-[11px] flex items-center justify-center font-bold shrink-0">
                             {idx + 1}
                           </span>
-                          <span className="text-xs font-semibold text-slate-300 truncate">
-                            {scene.speaker === 'thanh_tra' ? 'Thanh tra Minh' : 'Người kể'}
+                          <span className="text-xs font-semibold text-slate-200 truncate">
+                            {(() => {
+                              const foundChar = characters.find(c => c.id === scene.speaker || c.name === scene.speaker)
+                              if (foundChar) return `👤 ${foundChar.name}`
+                              if (scene.speaker === 'narrator') return '🎙️ Người kể'
+                              return scene.speaker ? `👤 ${scene.speaker}` : '🎙️ Người kể'
+                            })()}
+                          </span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
+                            {scene.action_type === 'chase'
+                              ? '🏃‍♂️ Rượt đuổi'
+                              : scene.action_type === 'trio'
+                              ? '🎭 Đa nhân vật'
+                              : scene.action_type === 'solo'
+                              ? '👤 Đơn độc'
+                              : '👥 Đối thoại'}
                           </span>
                           {(() => {
                             const sceneLoc = locations.find(l => l.id === scene.location_id)
@@ -467,8 +565,46 @@ export default function StorytimePage() {
                         </div>
                       </div>
 
-                      {/* Card Controls Row 2: Location, Voice, Camera, Expression */}
-                      <div className="grid grid-cols-4 gap-1.5 pt-0.5">
+                      {/* Card Controls Row 2: Speaker, Action Type, Voice, Location, Camera, Expression */}
+                      <div className="grid grid-cols-6 gap-1.5 pt-0.5">
+                        {/* Speaker Selector */}
+                        <select
+                          value={scene.speaker || (characters[0]?.id || 'char_1')}
+                          onChange={e => updateScene(idx, { speaker: e.target.value })}
+                          className="bg-slate-900 text-amber-300 text-[11px] px-1.5 py-1 rounded border border-amber-500/30 outline-none truncate font-medium"
+                          title="Ai là người nói câu này?"
+                        >
+                          {characters.length > 0 ? (
+                            <>
+                              {characters.map(c => (
+                                <option key={c.id} value={c.id}>
+                                  👤 {c.name}
+                                </option>
+                              ))}
+                              <option value="narrator">🎙️ Người kể</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value="char_1">👤 Nhân vật 1</option>
+                              <option value="char_2">👤 Nhân vật 2</option>
+                              <option value="narrator">🎙️ Người kể</option>
+                            </>
+                          )}
+                        </select>
+
+                        {/* Action Type / Sân khấu */}
+                        <select
+                          value={scene.action_type || 'dialogue'}
+                          onChange={e => updateScene(idx, { action_type: e.target.value })}
+                          className="bg-slate-900 text-blue-300 text-[11px] px-1.5 py-1 rounded border border-blue-500/30 outline-none truncate font-medium"
+                          title="Hành động sân khấu"
+                        >
+                          <option value="dialogue">👥 Đối chất</option>
+                          <option value="chase">🏃‍♂️ Rượt đuổi</option>
+                          <option value="trio">🎭 3 Người</option>
+                          <option value="solo">👤 Đơn độc</option>
+                        </select>
+
                         {/* Per-scene Location Selector */}
                         <select
                           value={scene.location_id || ''}
@@ -515,8 +651,8 @@ export default function StorytimePage() {
                           onChange={e => updateScene(idx, { camera: e.target.value })}
                           className="bg-slate-900 text-slate-300 text-[11px] px-1.5 py-1 rounded border border-slate-700 outline-none truncate"
                         >
-                          <option value="zoom_in">CAM: Zoom In</option>
-                          <option value="close">CAM: Cận mặt</option>
+                          <option value="zoom_in">CAM: Zoom</option>
+                          <option value="close">CAM: Cận</option>
                           <option value="pan_right">CAM: Pan Phải</option>
                           <option value="static">CAM: Tĩnh</option>
                         </select>
@@ -567,7 +703,7 @@ export default function StorytimePage() {
           </div>
 
           {/* Interactive Player with FFT Lip-Sync */}
-          <StorytimePlayer scenes={scenes} textConfig={textConfig} />
+          <StorytimePlayer scenes={scenes} textConfig={textConfig} characters={characters} />
 
           {/* Post-Production Step: Subtitle & Text Overlay Customizer */}
           <TextOverlayCustomizer

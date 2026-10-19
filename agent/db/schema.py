@@ -128,6 +128,9 @@ CREATE TABLE IF NOT EXISTS scene (
     -- Narration
     narrator_text TEXT,
 
+    -- Multi-actor layout (JSON array of {id, position, action, facing})
+    actors TEXT,
+
     created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
     updated_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
 );
@@ -258,6 +261,9 @@ CREATE INDEX IF NOT EXISTS idx_request_scene ON request(scene_id);
         if "narrator_text" not in scene_columns:
             await db.execute("ALTER TABLE scene ADD COLUMN narrator_text TEXT")
             logger.info("Migrated: added narrator_text column to scene table")
+        if "actors" not in scene_columns:
+            await db.execute("ALTER TABLE scene ADD COLUMN actors TEXT")
+            logger.info("Migrated: added actors column to scene table")
         # Migration: add narrator fields to project table
         cursor = await db.execute("PRAGMA table_info(project)")
         project_columns = {row[1] for row in await cursor.fetchall()}

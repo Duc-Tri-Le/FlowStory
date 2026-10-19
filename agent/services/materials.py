@@ -1,7 +1,7 @@
 """Material registry — built-in and custom visual styles for image generation."""
 
 _BUILTIN_IDS: frozenset[str] = frozenset({
-    "realistic", "3d_pixar", "anime", "ghibli", "stop_motion", "minecraft",
+    "realistic", "3d_pixar", "anime", "anime_comedy", "ghibli", "stop_motion", "minecraft",
     "oil_painting", "watercolor", "comic_book", "cyberpunk", "claymation",
     "lego", "retro_vhs", "oversimplified_2d", "cinematic_drama",
 })
@@ -22,6 +22,10 @@ MATERIALS: dict[str, dict] = {
             "Real RAW photograph, shot on Canon EOS R5, 35mm lens, "
             "natural available light."
         ),
+        "video_prefix": (
+            "Real live-action cinema footage, shot on Canon EOS R5 35mm lens, "
+            "natural lighting, real authentic footage, fine details."
+        ),
         "lighting": "Studio lighting, highly detailed",
     },
     "3d_pixar": {
@@ -39,6 +43,10 @@ MATERIALS: dict[str, dict] = {
         "scene_prefix": (
             "3D animated Pixar-quality rendering, vibrant colors, "
             "cinematic lighting."
+        ),
+        "video_prefix": (
+            "3D animated film footage, Pixar-quality animation, smooth subsurface scattering skin, "
+            "stylized cartoon anatomy, Disney-Pixar movie rendering, vibrant colors, cinematic lighting."
         ),
         "lighting": "Studio lighting, global illumination, highly detailed",
     },
@@ -58,7 +66,32 @@ MATERIALS: dict[str, dict] = {
             "Anime style, cel-shaded, vibrant colors, clean linework, "
             "dramatic anime lighting."
         ),
+        "video_prefix": (
+            "Japanese anime animation, smooth cel-shaded motion, sharp linework, "
+            "vibrant colors, expressive anime character animation, studio quality anime production."
+        ),
         "lighting": "Anime-style dramatic lighting, highly detailed",
+    },
+    "anime_comedy": {
+        "id": "anime_comedy",
+        "name": "Anime Comedy",
+        "style_instruction": (
+            "Anime comedy cartoon style, expressive humorous facial expressions, "
+            "exaggerated chibi reactions, bright vibrant pastel colors, clean cel-shaded anime lineart, "
+            "energetic comedy manga aesthetic."
+        ),
+        "negative_prompt": (
+            "NOT photorealistic, NOT dark gritty, NOT 3D render, NOT realistic."
+        ),
+        "scene_prefix": (
+            "Anime comedy style, hilarious expressive cartoon faces, vibrant colors, "
+            "clean cel-shaded lines, comedy anime aesthetic."
+        ),
+        "video_prefix": (
+            "Funny anime comedy animation, exaggerated hilarious cartoon expressions, "
+            "energetic character motion, chibi anime comedy style."
+        ),
+        "lighting": "Bright cheerful anime lighting, colorful and clean",
     },
     "stop_motion": {
         "id": "stop_motion",
@@ -76,6 +109,10 @@ MATERIALS: dict[str, dict] = {
         "scene_prefix": (
             "Stop-motion style, handcrafted felt and wood puppets, "
             "miniature set, warm workshop lighting."
+        ),
+        "video_prefix": (
+            "Felt and wood stop-motion animation, handcrafted puppet motion, "
+            "Wes Anderson and Laika style stop-motion frame rate, miniature tactile lighting."
         ),
         "lighting": "Warm practical miniature lighting, macro photography detail",
     },
@@ -96,6 +133,10 @@ MATERIALS: dict[str, dict] = {
             "Minecraft style, blocky voxel world, pixel textures, "
             "cubic geometry, game screenshot aesthetic."
         ),
+        "video_prefix": (
+            "Minecraft voxel animation, blocky cubic character motion, "
+            "16x16 pixel textures, rigid game aesthetic, cubic geometry."
+        ),
         "lighting": "Minecraft-style ambient lighting, block shadows",
     },
     "oil_painting": {
@@ -115,6 +156,10 @@ MATERIALS: dict[str, dict] = {
             "Oil painting style, visible brushstrokes, rich impasto texture, "
             "warm palette, dramatic chiaroscuro lighting."
         ),
+        "video_prefix": (
+            "Living oil painting animation, animated canvas with visible brushstrokes, "
+            "impasto texture in motion, rich chiaroscuro lighting, fine art masterpiece."
+        ),
         "lighting": "Dramatic chiaroscuro lighting, rich tonal depth",
     },
     "ghibli": {
@@ -132,6 +177,10 @@ MATERIALS: dict[str, dict] = {
         "scene_prefix": (
             "Studio Ghibli anime style, hand-painted watercolor backgrounds, "
             "soft pastel colors, gentle whimsical atmosphere."
+        ),
+        "video_prefix": (
+            "Studio Ghibli style anime animation, hand-drawn watercolor aesthetic, "
+            "gentle whimsical motion, Hayao Miyazaki anime movie quality, soft pastel lighting."
         ),
         "lighting": "Soft natural Ghibli lighting, golden hour warmth, dappled sunlight",
     },
@@ -151,6 +200,10 @@ MATERIALS: dict[str, dict] = {
             "Watercolor painting style, soft wet brushwork, "
             "translucent color washes, delicate ink outlines."
         ),
+        "video_prefix": (
+            "Animated watercolor painting, flowing color washes, delicate ink linework, "
+            "soft impressionistic motion on paper texture, dreamy artistic animation."
+        ),
         "lighting": "Soft diffused natural light, watercolor wash",
     },
     "comic_book": {
@@ -168,6 +221,10 @@ MATERIALS: dict[str, dict] = {
         "scene_prefix": (
             "Comic book style, bold ink outlines, vibrant flat colors, "
             "halftone shading, dynamic composition."
+        ),
+        "video_prefix": (
+            "Comic book animation, bold graphic novel ink outlines, "
+            "halftone dot textures in motion, dynamic comic action, vivid pop colors."
         ),
         "lighting": "High contrast comic lighting, dramatic shadows, rim light",
     },
@@ -188,6 +245,10 @@ MATERIALS: dict[str, dict] = {
             "Cyberpunk aesthetic, neon-lit dark urban, holographic displays, "
             "rain-slicked streets, purple and cyan neon."
         ),
+        "video_prefix": (
+            "Cyberpunk cinematic footage, neon-drenched dark sci-fi aesthetic, "
+            "holographic reflections in rain, volumetric neon lighting, Blade Runner movie feel."
+        ),
         "lighting": "Neon rim lighting, volumetric fog, cyan and magenta",
     },
     "claymation": {
@@ -207,6 +268,10 @@ MATERIALS: dict[str, dict] = {
             "Claymation style, clay puppet characters with fingerprint textures, "
             "miniature handmade sets, warm practical lighting."
         ),
+        "video_prefix": (
+            "Claymation stop-motion animation, malleable clay figures with visible fingerprint textures, "
+            "Aardman Studios style tactile motion, warm miniature set lighting."
+        ),
         "lighting": "Warm miniature set lighting, soft shadows, macro detail",
     },
     "lego": {
@@ -225,6 +290,10 @@ MATERIALS: dict[str, dict] = {
             "LEGO style, minifigure characters, brick-built environments, "
             "visible studs, plastic ABS texture."
         ),
+        "video_prefix": (
+            "LEGO animated film footage, plastic brick minifigure stop-motion, "
+            "The LEGO Movie aesthetic, ABS plastic reflections, clicky brick animation."
+        ),
         "lighting": "Bright toy photography lighting, sharp focus, product shot quality",
     },
     "retro_vhs": {
@@ -242,6 +311,10 @@ MATERIALS: dict[str, dict] = {
         "scene_prefix": (
             "Retro VHS style, analog scan lines, warm washed-out colors, "
             "CRT curvature, nostalgic 80s grain."
+        ),
+        "video_prefix": (
+            "1980s retro VHS camcorder footage, authentic analog tape scan lines, "
+            "chromatic aberration, tracking noise, nostalgic CRT color bleed."
         ),
         "lighting": "Warm tungsten lighting, CRT glow, analog video bloom",
     },

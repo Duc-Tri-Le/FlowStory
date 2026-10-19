@@ -33,6 +33,7 @@ def _to_response(material: dict, is_builtin: bool | None = None) -> MaterialResp
         style_instruction=material["style_instruction"],
         negative_prompt=material.get("negative_prompt"),
         scene_prefix=material.get("scene_prefix"),
+        video_prefix=material.get("video_prefix"),
         lighting=material.get("lighting", "Studio lighting, highly detailed"),
         is_builtin=is_builtin,
     )

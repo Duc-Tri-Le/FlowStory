@@ -12,7 +12,12 @@ import subprocess
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-import edge_tts
+try:
+    import edge_tts
+    HAS_EDGE_TTS = True
+except ImportError:
+    edge_tts = None
+    HAS_EDGE_TTS = False
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +66,9 @@ async def generate_speech(
     clean_text = text.strip()
     if not clean_text:
         return {"ok": False, "error": "Empty text", "duration": 0.0, "path": None}
+
+    if not HAS_EDGE_TTS or edge_tts is None:
+        return {"ok": False, "error": "edge-tts is not installed. Run: pip install edge-tts", "duration": 0.0, "path": None}
 
     communicate = edge_tts.Communicate(clean_text, voice, rate=rate, pitch=pitch, volume=volume)
     await communicate.save(str(out_file))

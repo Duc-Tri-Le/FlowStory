@@ -684,7 +684,7 @@ class CreateWithScriptRequest(BaseModel):
     scene_count: int | None = None
     description: str | None = None
     characters: list[dict] | None = None
-    orientation: str = "VERTICAL"
+    orientation: str = "HORIZONTAL"
 
 
 def _parse_story_blocks(raw_text: str, default_name: str) -> list[tuple[str, str]]:
