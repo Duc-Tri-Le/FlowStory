@@ -40,26 +40,19 @@ export default function DashboardPage() {
   // Modal state
   const [showBatchModal, setShowBatchModal] = useState(false)
 
-  // Load packages list
+  // Load packages list from backend
   const loadPackages = useCallback(async () => {
     try {
       const res = await fetchAPI<{ ok: boolean; packages: PackageItem[] }>('/api/storytime/packages')
       if (res.ok && res.packages) {
         setPackages(res.packages)
+        return res.packages
       }
+      setPackages([])
+      return []
     } catch {
-      // Fallback sample item if API isn't up
-      setPackages([
-        {
-          package_id: 'sample',
-          title: 'Bóng Đen Gian Chuồng Cũ (Hoạt Hình 2D Dân Gian)',
-          genre: 'folklore_2d',
-          scenes_count: 2,
-          total_duration: 12.0,
-          status: 'COMPLETED',
-          is_sample: true,
-        },
-      ])
+      setPackages([])
+      return []
     } finally {
       setLoading(false)
     }
@@ -67,6 +60,11 @@ export default function DashboardPage() {
 
   // Load specific package details into the Live Player
   const loadPackageScenes = useCallback(async (pkgId: string) => {
+    if (!pkgId) {
+      setCurrentScenes([])
+      setSelectedPackageId('')
+      return
+    }
     try {
       const res = await fetchAPI<{ ok: boolean; package: { scenes: StorytimeScene[] } }>(
         `/api/storytime/packages/${pkgId}`
@@ -81,22 +79,39 @@ export default function DashboardPage() {
   }, [])
 
   useEffect(() => {
-    loadPackages()
-    loadPackageScenes('sample')
+    loadPackages().then((pkgs) => {
+      if (pkgs && pkgs.length > 0) {
+        loadPackageScenes(pkgs[0].package_id)
+      } else {
+        setSelectedPackageId('')
+        setCurrentScenes([])
+      }
+    })
   }, [loadPackages, loadPackageScenes])
 
-  // Delete Package
+  // Delete Package & synchronize completely with database
   const handleDelete = async (pkgId: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (pkgId === 'sample') return
+    if (!window.confirm('Bạn có chắc chắn muốn xóa dự án này? Toàn bộ phân cảnh, video và âm thanh liên quan sẽ bị xóa vĩnh viễn khỏi cơ sở dữ liệu.')) {
+      return
+    }
     try {
       await fetchAPI(`/api/storytime/packages/${pkgId}`, { method: 'DELETE' })
-      setPackages(prev => prev.filter(p => p.package_id !== pkgId))
-      if (selectedPackageId === pkgId) {
-        loadPackageScenes('sample')
-      }
-    } catch {
-      // Ignore
+      setPackages(prev => {
+        const next = prev.filter(p => p.package_id !== pkgId)
+        if (selectedPackageId === pkgId) {
+          if (next.length > 0) {
+            loadPackageScenes(next[0].package_id)
+          } else {
+            setSelectedPackageId('')
+            setCurrentScenes([])
+          }
+        }
+        return next
+      })
+      setStatusMessage('Đã xóa dự án thành công khỏi hệ thống!')
+    } catch (err: any) {
+      alert('Xóa dự án thất bại: ' + (err?.message || err))
     }
   }
 
@@ -233,7 +248,16 @@ export default function DashboardPage() {
 
             {/* Table of Batches */}
             <div className="flex flex-col gap-2.5 overflow-hidden">
-              {packages.map((pkg, idx) => {
+              {packages.length === 0 ? (
+                <div className="p-8 rounded-xl border border-dashed border-slate-800 flex flex-col items-center justify-center text-center gap-2">
+                  <Film className="w-8 h-8 text-slate-600 mb-1" />
+                  <span className="text-sm font-semibold text-slate-300">Chưa có dự án nào</span>
+                  <span className="text-xs text-slate-500 max-w-xs">
+                    Hãy bấm nút "Thêm Kịch Bản Hàng Loạt" phía trên để nạp kịch bản và bắt đầu sản xuất.
+                  </span>
+                </div>
+              ) : (
+                packages.map((pkg, idx) => {
                 const isSelected = selectedPackageId === pkg.package_id
 
                 return (
@@ -305,13 +329,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 )
-              })}
-
-              {!packages.length && !loading && (
-                <div className="p-8 text-center text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl">
-                  Chưa có tập video nào. Hãy bấm "Thêm Kịch Bản Hàng Loạt" ở trên để bắt đầu!
-                </div>
-              )}
+              }))}
             </div>
           </div>
         </div>

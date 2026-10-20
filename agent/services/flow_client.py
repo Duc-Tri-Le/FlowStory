@@ -653,9 +653,11 @@ class FlowClient:
     # ─── High-level API Methods ──────────────────────────────
 
     def flow_project_id(self, requested: str | None = None) -> str | None:
-        """Validate an explicitly requested Flow project id."""
+        """Validate an explicitly requested Flow project id, or fallback to FLOW_PROJECT_ID."""
         if requested and self._UUID_RE.match(requested):
             return requested
+        if FLOW_PROJECT_ID and self._UUID_RE.match(FLOW_PROJECT_ID):
+            return FLOW_PROJECT_ID
         return None
 
     async def create_project(self, project_title: str, tool_name: str = "PINHOLE") -> dict:

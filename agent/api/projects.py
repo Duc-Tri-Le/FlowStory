@@ -9,7 +9,7 @@ import aiohttp
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from agent.config import BASE_DIR
+from agent.config import BASE_DIR, FLOW_PROJECT_ID
 from agent.models.project import Project, ProjectCreate, ProjectUpdate
 from agent.models.character import Character
 from agent.sdk.persistence.sqlite_repository import SQLiteRepository
@@ -43,9 +43,9 @@ COMPOSITION_GUIDELINES = {
         "Atmospheric and richly detailed. Show depth and spatial layout."
     ),
     "creature": (
-        "COMPOSITION: Full body shot showing the creature's complete form. "
-        "Emphasize natural stance (quadrupedal on all fours, bipedal upright, etc.). "
-        "Centered with clear view of distinctive features. Neutral background. "
+        "COMPOSITION: ONE single isolated creature only, centered on a pure solid white background (#FFFFFF). "
+        "Full body view showing complete creature anatomy and distinctive physical details (eyes, fangs, claws, fur/skin texture). "
+        "Strictly NO people, NO humans, NO stick figures, NO handlers, NO cage, NO leash, NO background scenery, NO text, NO labels. "
         "Proper scale and proportions relative to body structure."
     ),
     "visual_asset": (
@@ -116,14 +116,17 @@ def _build_character_profile(char_name: str, char_desc: str | None, story: str |
     elif entity_type in ("creature", "monster"):
         if is_2d_storytime:
             single_image_note = (
-                f"Dark uncanny {char_name} beast character model sheet on pure solid white background #FFFFFF. "
-                f"High-detail semi-realistic dark fantasy manga/anime style, eerie macabre biological textures, "
-                f"grotesque animalistic anatomy, and unsettling sinister unearthly eyes matching the specific beast ({base_desc}). "
+                f"ONE single isolated {char_name} creature centered on pure solid white background #FFFFFF. "
+                f"High-detail semi-realistic dark fantasy manga/anime creature design, showing only the creature itself and its terrifying biological details: "
+                f"grotesque animalistic anatomy, detailed biological textures, eerie sinister unearthly eyes, sharp fangs and claws ({base_desc}). "
                 f"No horns unless explicitly requested. "
-                f"Striking uncanny contrast against minimalist stick-figure characters. Strictly NO text, NO numbers, NO labels, NO borders anywhere. "
+                f"Sole isolated creature subject only. Strictly NO people, NO humans, NO stick figures, NO other characters, NO background elements, NO cage, NO leash, NO text, NO numbers, NO labels, NO borders anywhere. "
             )
         else:
-            single_image_note = "ONE single clean reference image only, NOT a multi-panel grid. "
+            single_image_note = (
+                "ONE single clean isolated creature reference image centered on pure solid white background #FFFFFF. "
+                "Strictly NO people, NO humans, NO handlers, NO cage, NO leash, NO environment, NOT a multi-panel grid. "
+            )
     elif entity_type == "location":
         if is_2d_storytime:
             single_image_note = (
@@ -775,7 +778,7 @@ async def create_with_script(body: CreateWithScriptRequest):
     from agent.api.active_project import _write_state
     from agent.services.auto_pipeline import enqueue_reference_images_only
 
-    flow_id = body.flow_project_id.strip() if body.flow_project_id and body.flow_project_id.strip() else None
+    flow_id = body.flow_project_id.strip() if body.flow_project_id and body.flow_project_id.strip() else (FLOW_PROJECT_ID or None)
     story_blocks = _parse_story_blocks(body.story, body.name)
 
     repo = _get_repo()

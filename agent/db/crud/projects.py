@@ -21,7 +21,78 @@ async def create_project(name: str, description: str = None, story: str = None, 
 
 async def get_project(pid: str): return await _get("project", "id", pid)
 async def update_project(pid: str, **kw): return await _update("project", "id", pid, **kw)
-async def delete_project(pid: str): return await _delete("project", "id", pid)
+async def delete_project(pid: str) -> bool:
+    """Cascade delete a project and all its related videos, scenes, requests, orphaned characters, and disk files."""
+    db = await get_db()
+    vids = []
+    async with _db_lock:
+        # Check if project exists
+        cur = await db.execute("SELECT id FROM project WHERE id=?", (pid,))
+        if not await cur.fetchone():
+            return False
+
+        # 1. Find all videos for this project
+        cur_v = await db.execute("SELECT id FROM video WHERE project_id=?", (pid,))
+        vids = [r[0] for r in await cur_v.fetchall()]
+
+        # 2. Delete all scenes and requests for these videos
+        for vid in vids:
+            await db.execute("DELETE FROM request WHERE video_id=?", (vid,))
+            await db.execute("DELETE FROM scene WHERE video_id=?", (vid,))
+
+        # 3. Delete requests linked directly to project
+        await db.execute("DELETE FROM request WHERE project_id=?", (pid,))
+
+        # 4. Delete videos
+        await db.execute("DELETE FROM video WHERE project_id=?", (pid,))
+
+        # 5. Delete project_character links
+        await db.execute("DELETE FROM project_character WHERE project_id=?", (pid,))
+
+        # 6. Delete orphaned characters (not linked to any project anymore)
+        await db.execute("""
+            DELETE FROM character WHERE id NOT IN (
+                SELECT character_id FROM project_character
+            )
+        """)
+
+        # 7. Delete project itself
+        await db.execute("DELETE FROM project WHERE id=?", (pid,))
+        await db.commit()
+
+    # 8. Clean disk files & active project state
+    try:
+        from agent.config import OUTPUT_DIR
+        import shutil
+        # Delete storytime package folder
+        pkg_dir = OUTPUT_DIR / "storytime" / f"pkg_{pid}"
+        if pkg_dir.exists():
+            shutil.rmtree(pkg_dir, ignore_errors=True)
+
+        # Delete any preview/concat files for this project or its videos
+        preview_dir = OUTPUT_DIR / "preview"
+        if preview_dir.exists():
+            for vid in vids:
+                for f in preview_dir.glob(f"*{vid}*"):
+                    try:
+                        f.unlink(missing_ok=True)
+                    except Exception:
+                        pass
+            for f in preview_dir.glob(f"*{pid}*"):
+                try:
+                    f.unlink(missing_ok=True)
+                except Exception:
+                    pass
+
+        # Clear active_project state if it matches this project
+        from agent.api.active_project import _read_state, _clear_state
+        state = _read_state()
+        if state and state.get("project_id") == pid:
+            _clear_state()
+    except Exception as e:
+        logger.warning("Error cleaning project files/state for %s: %s", pid, e)
+
+    return True
 
 
 async def list_projects(status: str = None) -> list[dict]:

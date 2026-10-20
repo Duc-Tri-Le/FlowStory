@@ -645,34 +645,60 @@ async def serve_pkg_audio(package_id: str, filename: str):
 
 @router.get("/packages")
 async def list_packages():
-    """List all created storytime packages for batch dashboard."""
-    packages = []
-    
-    # 1. Include sample package if exists
-    sample_file = OUTPUT_DIR / "sample_remotion_dist" / "remotion_input.json"
-    if sample_file.exists():
-        try:
-            sdata = json.loads(sample_file.read_text(encoding="utf-8"))
-            packages.append({
-                "package_id": "sample",
-                "title": sdata.get("title", "Bóng Đen Gian Chuồng Cũ (Hoạt Hình 2D Dân Gian)"),
-                "genre": sdata.get("genre", "folklore_2d"),
-                "scenes_count": len(sdata.get("scenes", [])),
-                "total_duration": sdata.get("total_duration_seconds", 12.0),
-                "status": "COMPLETED",
-                "is_sample": True,
-            })
-        except Exception:
-            pass
+    """List all created storytime packages / database projects for batch dashboard."""
+    from agent.db.crud.projects import list_projects
+    from agent.db.crud.scenes import list_scenes
+    from agent.db.crud.videos import list_videos
 
-    # 2. Scan STORYTIME_DIR for pkg_*
+    packages = []
+    try:
+        projects = await list_projects()
+        for p in projects:
+            if p.get("status") == "DELETED":
+                continue
+            pid = p["id"]
+            vids = await list_videos(pid)
+            total_scenes = 0
+            total_duration = 0.0
+            for v in vids:
+                scs = await list_scenes(v["id"])
+                total_scenes += len(scs)
+                total_duration += sum((s.get("duration") or 6.0) for s in scs)
+
+            manifest_file = STORYTIME_DIR / f"pkg_{pid}" / "package.json"
+            if manifest_file.exists():
+                try:
+                    pdata = json.loads(manifest_file.read_text(encoding="utf-8"))
+                    if pdata.get("scenes"):
+                        total_scenes = len(pdata["scenes"])
+                    if pdata.get("total_duration_seconds"):
+                        total_duration = pdata["total_duration_seconds"]
+                except Exception:
+                    pass
+
+            packages.append({
+                "package_id": pid,
+                "title": p.get("name", "Câu Chuyện Mới"),
+                "genre": p.get("material", "general"),
+                "scenes_count": total_scenes,
+                "total_duration": total_duration,
+                "status": p.get("status", "ACTIVE"),
+                "is_sample": False,
+            })
+    except Exception as e:
+        logger.warning("Error querying projects for packages: %s", e)
+
+    # Scan any standalone pkg_* that might not be in DB
     for pkg_folder in sorted(STORYTIME_DIR.glob("pkg_*"), reverse=True):
+        raw_id = pkg_folder.name.replace("pkg_", "")
+        if any(pkg["package_id"] == raw_id for pkg in packages):
+            continue
         manifest_file = pkg_folder / "package.json"
         if manifest_file.exists():
             try:
                 pdata = json.loads(manifest_file.read_text(encoding="utf-8"))
                 packages.append({
-                    "package_id": pdata.get("package_id", pkg_folder.name.replace("pkg_", "")),
+                    "package_id": raw_id,
                     "title": pdata.get("title", "Câu Chuyện Không Tên"),
                     "genre": pdata.get("genre", "general"),
                     "scenes_count": len(pdata.get("scenes", [])),
@@ -681,39 +707,81 @@ async def list_packages():
                     "is_sample": False,
                 })
             except Exception:
-                continue
+                pass
 
     return {"ok": True, "packages": packages}
 
 
 @router.get("/packages/{package_id}")
 async def get_package(package_id: str):
-    """Get full package data by ID."""
-    if package_id == "sample":
-        return await get_sample_package()
-    
+    """Get full package data by ID — from storytime disk manifest or directly from project DB."""
+    # 1. Try disk manifest first
     pkg_file = STORYTIME_DIR / f"pkg_{package_id}" / "package.json"
-    if not pkg_file.exists():
-        raise HTTPException(404, "Package not found")
-    
-    try:
-        pdata = json.loads(pkg_file.read_text(encoding="utf-8"))
-        return {"ok": True, "package": pdata}
-    except Exception as e:
-        raise HTTPException(500, f"Error reading package: {e}")
+    if pkg_file.exists():
+        try:
+            pdata = json.loads(pkg_file.read_text(encoding="utf-8"))
+            return {"ok": True, "package": pdata}
+        except Exception as e:
+            logger.warning("Error reading pkg_%s: %s", package_id, e)
+
+    # 2. Try loading from database project
+    from agent.db.crud.projects import get_project
+    from agent.db.crud.videos import list_videos
+    from agent.db.crud.scenes import list_scenes
+
+    proj = await get_project(package_id)
+    if not proj:
+        if package_id == "sample":
+            return await get_sample_package()
+        raise HTTPException(404, "Dự án / Package không tồn tại")
+
+    vids = await list_videos(package_id)
+    db_scenes = []
+    video_url = None
+    if vids:
+        main_video = vids[0]
+        video_url = main_video.get("horizontal_url") or main_video.get("vertical_url")
+        raw_scenes = await list_scenes(main_video["id"])
+        raw_scenes = sorted(raw_scenes, key=lambda s: s.get("display_order", 0))
+        for s in raw_scenes:
+            db_scenes.append({
+                "display_order": s.get("display_order", 0),
+                "text": s.get("narrator_text") or s.get("prompt") or "",
+                "speaker": "narrator",
+                "camera": "zoom_in",
+                "expression": "serious",
+                "duration": s.get("duration") or 6.0,
+                "video_url": s.get("horizontal_video_url") or s.get("vertical_video_url"),
+                "image_url": s.get("horizontal_image_url") or s.get("vertical_image_url"),
+            })
+
+    return {
+        "ok": True,
+        "package": {
+            "package_id": package_id,
+            "title": proj.get("name", "Dự Án"),
+            "genre": proj.get("material", "general"),
+            "scenes": db_scenes,
+            "total_duration_seconds": sum(s.get("duration", 6.0) for s in db_scenes),
+            "video_url": video_url,
+        }
+    }
 
 
 @router.delete("/packages/{package_id}")
 async def delete_package(package_id: str):
-    """Delete a package and its audio files."""
-    if package_id == "sample":
-        raise HTTPException(400, "Cannot delete sample package")
-    
-    import shutil
+    """Delete a package and completely wipe its project and files from database and disk."""
+    from agent.db.crud.projects import delete_project as crud_delete_project
+    await crud_delete_project(package_id)
+
+    # Clean storytime folder if any
     target_dir = STORYTIME_DIR / f"pkg_{package_id}"
     if target_dir.exists():
+        import shutil
         shutil.rmtree(target_dir, ignore_errors=True)
+
     return {"ok": True}
+
 
 
 class BatchStoryItem(BaseModel):

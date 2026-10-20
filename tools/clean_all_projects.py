@@ -92,10 +92,30 @@ def clean_files():
                 test_file.unlink()
                 print(f"  [x] Đã xóa: {test_file.name}")
 
-        # Xóa các thư mục project riêng biệt nếu có trong output/ (ngoại trừ sample_remotion_dist)
+        # Dọn dẹp toàn bộ các thư mục pkg_* trong storytime
+        st_dir = OUTPUT_DIR / "storytime"
+        if st_dir.exists():
+            for pkg_folder in st_dir.glob("pkg_*"):
+                if pkg_folder.is_dir():
+                    shutil.rmtree(pkg_folder, ignore_errors=True)
+                    print(f"  [x] Đã xóa gói storytime: {pkg_folder.name}")
+
+        # Dọn dẹp output/preview
+        preview_dir = OUTPUT_DIR / "preview"
+        if preview_dir.exists():
+            shutil.rmtree(preview_dir, ignore_errors=True)
+            print(f"  [x] Đã xóa thư mục preview video")
+
+        # Xóa sample_remotion_dist nếu có
+        sample_rem = OUTPUT_DIR / "sample_remotion_dist"
+        if sample_rem.exists():
+            shutil.rmtree(sample_rem, ignore_errors=True)
+            print(f"  [x] Đã xóa thư mục sample_remotion_dist")
+
+        # Xóa các thư mục project riêng biệt nếu có trong output/
         for item in OUTPUT_DIR.iterdir():
-            if item.is_dir() and item.name not in ["sample_remotion_dist", "storytime", "test_audio"]:
-                shutil.rmtree(item)
+            if item.is_dir() and item.name not in ["storytime", "test_audio"]:
+                shutil.rmtree(item, ignore_errors=True)
                 print(f"  [x] Đã xóa thư mục output dự án: {item.name}")
 
 if __name__ == "__main__":
